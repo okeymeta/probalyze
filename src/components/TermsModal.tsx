@@ -9,33 +9,33 @@ interface TermsModalProps {
 
 export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="glass-card max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border-2 border-purple-500/30 shadow-2xl shadow-purple-500/20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="glass-card w-full max-w-2xl sm:max-w-3xl rounded-2xl border-2 border-purple-500/30 shadow-2xl shadow-purple-500/20 my-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-gray-800 p-6 z-10">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
-                Terms of Service & Risk Disclosure
+        <div className="sticky top-0 bg-background/95 backdrop-blur-xl border-b border-gray-800 p-3 sm:p-4 md:p-6 z-10">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1 sm:mb-2">
+                Terms & Risk
               </h2>
-              <p className="text-gray-400 text-sm">Please read carefully before connecting your wallet</p>
+              <p className="text-gray-400 text-xs sm:text-sm">Please read carefully before connecting your wallet</p>
             </div>
             <button
               onClick={onDecline}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+              className="text-gray-400 hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-800 rounded-lg shrink-0"
               aria-label="Close"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-6 overflow-y-auto max-h-[calc(90vh-80px)]">
           {/* Risk Warning */}
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-5">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+              <AlertTriangle className="w-6 h-6 text-red-400 shrink-0 mt-1" />
               <div>
                 <h3 className="text-lg font-bold text-red-400 mb-2">⚠️ Risk Warning</h3>
                 <p className="text-gray-300 text-sm leading-relaxed mb-3">
@@ -45,19 +45,19 @@ export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) =
                 </p>
                 <ul className="space-y-2 text-sm text-gray-400">
                   <li className="flex items-start gap-2">
-                    <span className="text-red-400 flex-shrink-0">•</span>
+                    <span className="text-red-400 shrink-0">•</span>
                     <span><strong>Loss of Funds:</strong> You may lose some or all of your invested capital.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-red-400 flex-shrink-0">•</span>
+                    <span className="text-red-400 shrink-0">•</span>
                     <span><strong>No Guarantees:</strong> Past performance does not guarantee future results.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-red-400 flex-shrink-0">•</span>
+                    <span className="text-red-400 shrink-0">•</span>
                     <span><strong>Market Risk:</strong> Prediction markets can be volatile and unpredictable.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-red-400 flex-shrink-0">•</span>
+                    <span className="text-red-400 shrink-0">•</span>
                     <span><strong>Blockchain Risks:</strong> Smart contract bugs, network issues, and transaction failures may occur.</span>
                   </li>
                 </ul>
@@ -68,7 +68,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) =
           {/* Platform Fees */}
           <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-5">
             <div className="flex items-start gap-3">
-              <DollarSign className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
+              <DollarSign className="w-6 h-6 text-purple-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-purple-400 mb-3">💰 Fee Structure</h3>
                 <div className="space-y-3">
@@ -97,28 +97,28 @@ export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) =
           {/* How It Works */}
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5">
             <div className="flex items-start gap-3">
-              <Scale className="w-6 h-6 text-blue-400 flex-shrink-0 mt-1" />
+              <Scale className="w-6 h-6 text-blue-400 shrink-0 mt-1" />
               <div>
                 <h3 className="text-lg font-bold text-blue-400 mb-3">⚖️ Market Resolution</h3>
                 <ul className="space-y-2 text-sm text-gray-400">
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-400 flex-shrink-0">1.</span>
+                    <span className="text-blue-400 shrink-0">1.</span>
                     <span>Markets are created by platform administrators with clear resolution criteria.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-400 flex-shrink-0">2.</span>
+                    <span className="text-blue-400 shrink-0">2.</span>
                     <span>You trade by betting on YES or NO outcomes using SOL.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-400 flex-shrink-0">3.</span>
+                    <span className="text-blue-400 shrink-0">3.</span>
                     <span>When the event concludes, administrators resolve the market based on verifiable outcomes.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-400 flex-shrink-0">4.</span>
+                    <span className="text-blue-400 shrink-0">4.</span>
                     <span>Winnings are automatically distributed to winning participants proportionally.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-400 flex-shrink-0">5.</span>
+                    <span className="text-blue-400 shrink-0">5.</span>
                     <span>All transactions are recorded on the Solana blockchain for transparency.</span>
                   </li>
                 </ul>
@@ -129,28 +129,28 @@ export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) =
           {/* User Responsibilities */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
             <div className="flex items-start gap-3">
-              <Shield className="w-6 h-6 text-green-400 flex-shrink-0 mt-1" />
+              <Shield className="w-6 h-6 text-green-400 shrink-0 mt-1" />
               <div>
                 <h3 className="text-lg font-bold text-green-400 mb-3">🛡️ Your Responsibilities</h3>
                 <ul className="space-y-2 text-sm text-gray-400">
                   <li className="flex items-start gap-2">
-                    <span className="text-green-400 flex-shrink-0">✓</span>
+                    <span className="text-green-400 shrink-0">✓</span>
                     <span>You are 18 years or older and legally permitted to participate in prediction markets.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-green-400 flex-shrink-0">✓</span>
+                    <span className="text-green-400 shrink-0">✓</span>
                     <span>You are solely responsible for the security of your wallet and private keys.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-green-400 flex-shrink-0">✓</span>
+                    <span className="text-green-400 shrink-0">✓</span>
                     <span>You understand that blockchain transactions are irreversible.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-green-400 flex-shrink-0">✓</span>
+                    <span className="text-green-400 shrink-0">✓</span>
                     <span>You will not engage in market manipulation, wash trading, or other fraudulent activities.</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-green-400 flex-shrink-0">✓</span>
+                    <span className="text-green-400 shrink-0">✓</span>
                     <span>You accept that {PLATFORM_NAME} administrators have final authority on market resolutions.</span>
                   </li>
                 </ul>
@@ -182,7 +182,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) =
         </div>
 
         {/* Actions */}
-        <div className="sticky bottom-0 bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-gray-800 p-6">
+        <div className="sticky bottom-0 bg-background/95 backdrop-blur-xl border-t border-gray-800 p-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={onDecline}
@@ -192,7 +192,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ onAccept, onDecline }) =
             </button>
             <button
               onClick={onAccept}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50"
+              className="flex-1 px-6 py-3 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50"
             >
               I Accept - Connect Wallet
             </button>

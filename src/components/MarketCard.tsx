@@ -144,7 +144,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
             (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%2313131a" width="400" height="300"/%3E%3Ctext fill="%239CA3AF" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3E📊%3C/text%3E%3C/svg%3E';
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-background via-background/60 to-transparent"></div>
         
         {/* Top badges */}
         <div className="absolute top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 flex items-start justify-between gap-2">
@@ -285,7 +285,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         {/* Probability Bar */}
         <div className="w-full bg-gray-800 rounded-full h-1.5 sm:h-2 overflow-hidden mb-4">
           <div 
-            className="bg-gradient-to-r from-green-500 to-green-400 h-full transition-all duration-500 shadow-lg shadow-green-500/30"
+            className="bg-linear-to-r from-green-500 to-green-400 h-full transition-all duration-500 shadow-lg shadow-green-500/30"
             style={{ width: `${yesPercentage}%` }}
           />
         </div>
@@ -327,7 +327,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
             </div>
 
             {/* REAL-TIME PAYOUT IF MARKET CLOSES NOW */}
-            <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/40 rounded-lg p-3 animate-pulse-glow">
+            <div className="bg-linear-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/40 rounded-lg p-3 animate-pulse-glow">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="w-4 h-4 text-blue-400" />
                 <span className="text-blue-300 font-bold text-xs sm:text-sm">If Market Closes NOW</span>
@@ -426,7 +426,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
                 e.stopPropagation();
                 onBetClick(market);
               }}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 text-sm sm:text-base"
+              className="flex-1 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 text-sm sm:text-base"
             >
               Trade Now
             </button>
@@ -438,7 +438,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
                 e.stopPropagation();
                 onResolveClick(market);
               }}
-              className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all text-sm sm:text-base"
+              className="flex-1 bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all text-sm sm:text-base"
             >
               Resolve
             </button>

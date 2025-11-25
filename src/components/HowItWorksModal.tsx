@@ -8,41 +8,41 @@ interface HowItWorksModalProps {
 
 export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="glass-card max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border-2 border-purple-500/30 shadow-2xl shadow-purple-500/20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="glass-card w-full max-w-2xl sm:max-w-4xl rounded-2xl border-2 border-purple-500/30 shadow-2xl shadow-purple-500/20 my-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-[#0a0a0f]/95 backdrop-blur-xl border-b border-gray-800 p-6 z-10">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold gradient-text mb-2">
-                📚 Complete Trading Guide
+        <div className="sticky top-0 bg-background/95 backdrop-blur-xl border-b border-gray-800 p-3 sm:p-4 md:p-6 z-10">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-bold gradient-text mb-1 sm:mb-2">
+                📚 Trading Guide
               </h2>
-              <p className="text-gray-400 text-sm">Everything you need to know about trading on {PLATFORM_NAME}</p>
+              <p className="text-gray-400 text-xs sm:text-sm">Everything you need to know about trading on {PLATFORM_NAME}</p>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+              className="text-gray-400 hover:text-white transition-colors p-1.5 sm:p-2 hover:bg-gray-800 rounded-lg shrink-0"
               aria-label="Close"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           {/* Overview */}
-          <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <TrendingUp className="w-7 h-7 text-purple-400 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="text-xl font-bold text-purple-400 mb-3">🎯 What is {PLATFORM_NAME}?</h3>
-                <p className="text-gray-300 text-sm leading-relaxed mb-3">
+          <div className="bg-linear-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 sm:p-4 md:p-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-purple-400 shrink-0 mt-0.5 sm:mt-1" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-purple-400 mb-2 sm:mb-3">🎯 What is {PLATFORM_NAME}?</h3>
+                <p className="text-gray-300 text-xs sm:text-sm leading-relaxed mb-2 sm:mb-3">
                   {PLATFORM_NAME} is a prediction market platform where you can trade on the outcome of real-world events. 
                   Think of it as betting on future events, but with dynamic pricing based on market demand—similar to 
                   how stock prices move based on supply and demand.
                 </p>
-                <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
+                <div className="bg-gray-900/50 rounded-lg p-2.5 sm:p-3 md:p-4 border border-gray-800">
                   <p className="text-xs text-gray-400 leading-relaxed">
                     <strong className="text-white">Example:</strong> If there's a market on "Will Bitcoin reach $100k by December?", 
                     you can buy "Yes" shares if you think it will happen, or "No" shares if you think it won't. The more people 
@@ -54,38 +54,38 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           </div>
 
           {/* How This Differs from Traditional Betting */}
-          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-6">
-            <div className="flex items-start gap-3">
-              <Zap className="w-7 h-7 text-blue-400 flex-shrink-0 mt-1" />
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-blue-400 mb-4">⚡ How This Differs from Traditional Betting</h3>
+          <div className="bg-linear-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-3 sm:p-4 md:p-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-blue-400 shrink-0 mt-0.5 sm:mt-1" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-blue-400 mb-3 sm:mb-4">⚡ How This Differs from Traditional Betting</h3>
                 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-                      <div className="text-red-400 font-bold mb-3 flex items-center gap-2">
-                        <span className="text-xl">🎰</span>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 sm:p-3 md:p-4">
+                      <div className="text-red-400 font-bold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                        <span className="text-lg sm:text-xl">🎰</span>
                         <span>Traditional Betting</span>
                       </div>
-                      <ul className="space-y-2 text-xs text-gray-400">
+                      <ul className="space-y-1.5 sm:space-y-2 text-xs text-gray-400">
                         <li className="flex items-start gap-2">
-                          <span className="text-red-400">•</span>
+                          <span className="text-red-400 shrink-0">•</span>
                           <span><strong className="text-white">Fixed Odds:</strong> Odds are set by bookmaker and don't change after you bet</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-red-400">•</span>
+                          <span className="text-red-400 shrink-0">•</span>
                           <span><strong className="text-white">House Always Wins:</strong> Bookmaker takes a cut and sets odds in their favor</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-red-400">•</span>
+                          <span className="text-red-400 shrink-0">•</span>
                           <span><strong className="text-white">Binary Payout:</strong> You either win a fixed amount or lose everything</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-red-400">•</span>
+                          <span className="text-red-400 shrink-0">•</span>
                           <span><strong className="text-white">No Market Insight:</strong> You can't see what other bettors are doing</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-red-400">•</span>
+                          <span className="text-red-400 shrink-0">•</span>
                           <span><strong className="text-white">Centralized:</strong> Bookmaker controls everything and can limit winning accounts</span>
                         </li>
                       </ul>
@@ -98,23 +98,23 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                       </div>
                       <ul className="space-y-2 text-xs text-gray-400">
                         <li className="flex items-start gap-2">
-                          <span className="text-green-400">•</span>
+                          <span className="text-green-400 shrink-0">•</span>
                           <span><strong className="text-white">Dynamic Odds:</strong> Prices update in real-time based on market activity</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-green-400">•</span>
+                          <span className="text-green-400 shrink-0">•</span>
                           <span><strong className="text-white">Peer-to-Peer:</strong> You bet against other traders, not the house</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-green-400">•</span>
+                          <span className="text-green-400 shrink-0">•</span>
                           <span><strong className="text-white">Proportional Payouts:</strong> Win more when you bet on the less popular side</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-green-400">•</span>
+                          <span className="text-green-400 shrink-0">•</span>
                           <span><strong className="text-white">Full Transparency:</strong> See all bettors, amounts, and market statistics</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-green-400">•</span>
+                          <span className="text-green-400 shrink-0">•</span>
                           <span><strong className="text-white">Decentralized:</strong> Powered by blockchain, transparent and fair for everyone</span>
                         </li>
                       </ul>
@@ -140,9 +140,9 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           </div>
 
           {/* Risk & How You Can Lose Money */}
-          <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-6">
+          <div className="bg-linear-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-7 h-7 text-red-400 flex-shrink-0 mt-1" />
+              <AlertTriangle className="w-7 h-7 text-red-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-red-400 mb-4">⚠️ Understanding Risk: How You Can Lose Money</h3>
                 
@@ -157,7 +157,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                   <div className="space-y-3">
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">1</div>
+                        <div className="bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">1</div>
                         <h4 className="text-white font-bold">Wrong Prediction = Total Loss</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-3">
@@ -173,7 +173,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-orange-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">2</div>
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">2</div>
                         <h4 className="text-white font-bold">Platform Fees Reduce Your Position</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-3">
@@ -189,7 +189,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-yellow-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">3</div>
+                        <div className="bg-yellow-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">3</div>
                         <h4 className="text-white font-bold">Betting on Heavy Favorites = Small Returns</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-3">
@@ -204,7 +204,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-purple-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">4</div>
+                        <div className="bg-purple-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">4</div>
                         <h4 className="text-white font-bold">Price Changes After You Bet</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-3">
@@ -220,7 +220,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">5</div>
+                        <div className="bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">5</div>
                         <h4 className="text-white font-bold">No Early Exit / Can't Cancel</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-3">
@@ -235,7 +235,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-red-500/20 to-black border-2 border-red-500/50 rounded-lg p-5">
+                  <div className="bg-linear-to-br from-red-500/20 to-black border-2 border-red-500/50 rounded-lg p-5">
                     <div className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
                       <AlertTriangle className="w-6 h-6" />
                       <span>⚡ Risk Summary</span>
@@ -271,7 +271,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* How Trading Works */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <BarChart3 className="w-7 h-7 text-green-400 flex-shrink-0 mt-1" />
+              <BarChart3 className="w-7 h-7 text-green-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-green-400 mb-4">📊 How Trading Works</h3>
                 
@@ -352,7 +352,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* Understanding Percentages */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <Calculator className="w-7 h-7 text-blue-400 flex-shrink-0 mt-1" />
+              <Calculator className="w-7 h-7 text-blue-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-blue-400 mb-4">🧮 Understanding Percentages & Prices</h3>
                 
@@ -419,7 +419,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* SOL Calculation & Payouts */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <DollarSign className="w-7 h-7 text-yellow-400 flex-shrink-0 mt-1" />
+              <DollarSign className="w-7 h-7 text-yellow-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-yellow-400 mb-4">💰 SOL Calculations & Payouts</h3>
                 
@@ -459,7 +459,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                   <div>
                     <h4 className="text-white font-semibold mb-2">Payout Calculation Example</h4>
-                    <div className="bg-gradient-to-br from-green-500/10 to-blue-500/10 border border-green-500/30 rounded-lg p-5">
+                    <div className="bg-linear-to-br from-green-500/10 to-blue-500/10 border border-green-500/30 rounded-lg p-5">
                       <div className="text-sm font-bold text-green-400 mb-3">📊 Scenario: Bitcoin $100k Market</div>
                       
                       <div className="space-y-3 text-sm">
@@ -533,7 +533,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* Copy Trading */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <Copy className="w-7 h-7 text-cyan-400 flex-shrink-0 mt-1" />
+              <Copy className="w-7 h-7 text-cyan-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-cyan-400 mb-4">👥 Copy Trading</h3>
                 
@@ -621,7 +621,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* Market Lifecycle */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <Clock className="w-7 h-7 text-orange-400 flex-shrink-0 mt-1" />
+              <Clock className="w-7 h-7 text-orange-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-orange-400 mb-4">⏰ Market Lifecycle & Timing</h3>
                 
@@ -630,7 +630,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                     <h4 className="text-white font-bold mb-3">📅 Key Timestamps</h4>
                     <div className="space-y-3 text-sm">
                       <div className="flex items-start gap-3">
-                        <div className="bg-blue-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</div>
+                        <div className="bg-blue-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0 mt-0.5">1</div>
                         <div>
                           <div className="text-white font-semibold">Creation Time</div>
                           <div className="text-xs text-gray-400">When the market is created and trading begins</div>
@@ -638,7 +638,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-green-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">2</div>
+                        <div className="bg-green-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0 mt-0.5">2</div>
                         <div>
                           <div className="text-white font-semibold">Trading Period (Active)</div>
                           <div className="text-xs text-gray-400">Users can place bets, percentages update dynamically, copy trading is available</div>
@@ -646,7 +646,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-orange-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">3</div>
+                        <div className="bg-orange-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0 mt-0.5">3</div>
                         <div>
                           <div className="text-white font-semibold">Market Closes</div>
                           <div className="text-xs text-gray-400">No more bets accepted after "Closes At" time. Market status changes to "Closed"</div>
@@ -654,7 +654,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-purple-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">4</div>
+                        <div className="bg-purple-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0 mt-0.5">4</div>
                         <div>
                           <div className="text-white font-semibold">Resolution Time</div>
                           <div className="text-xs text-gray-400">Expected time when the outcome will be verified and the market will be resolved</div>
@@ -662,7 +662,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0 mt-0.5">5</div>
+                        <div className="bg-red-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0 mt-0.5">5</div>
                         <div>
                           <div className="text-white font-semibold">Payout Distribution</div>
                           <div className="text-xs text-gray-400">Winnings automatically sent to all winning participants based on their share</div>
@@ -695,7 +695,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* Official Resolution Process */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <Shield className="w-7 h-7 text-emerald-400 flex-shrink-0 mt-1" />
+              <Shield className="w-7 h-7 text-emerald-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-emerald-400 mb-4">✅ Official Market Resolution Process</h3>
                 
@@ -712,7 +712,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
                   <div className="space-y-3">
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">1</div>
+                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">1</div>
                         <h4 className="text-white font-bold">Event Verification</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9">
@@ -723,7 +723,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">2</div>
+                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">2</div>
                         <h4 className="text-white font-bold">Resolution Criteria Review</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-2">
@@ -738,7 +738,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">3</div>
+                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">3</div>
                         <h4 className="text-white font-bold">Official Resolution Declaration</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9">
@@ -749,7 +749,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
 
                     <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs flex-shrink-0">4</div>
+                        <div className="bg-emerald-500 text-white w-6 h-6 rounded flex items-center justify-center text-xs shrink-0">4</div>
                         <h4 className="text-white font-bold">Automatic Payout Distribution</h4>
                       </div>
                       <p className="text-sm text-gray-400 ml-9 mb-2">
@@ -804,7 +804,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           {/* Bettor Statistics */}
           <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="flex items-start gap-3">
-              <Users className="w-7 h-7 text-pink-400 flex-shrink-0 mt-1" />
+              <Users className="w-7 h-7 text-pink-400 shrink-0 mt-1" />
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-pink-400 mb-4">👥 Bettor Statistics & Transparency</h3>
                 
@@ -886,7 +886,7 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
           </div>
 
           {/* Quick Reference */}
-          <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-xl p-6">
+          <div className="bg-linear-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-xl p-6">
             <h3 className="text-xl font-bold gradient-text mb-4">📌 Quick Reference</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">
@@ -922,10 +922,10 @@ export const HowItWorksModal: React.FC<HowItWorksModalProps> = ({ onClose }) => 
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[#0a0a0f]/95 backdrop-blur-xl border-t border-gray-800 p-6">
+        <div className="sticky bottom-0 bg-background/95 backdrop-blur-xl border-t border-gray-800 p-6">
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50"
+            className="w-full px-6 py-3 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50"
           >
             Got It - Start Trading!
           </button>

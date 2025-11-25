@@ -21,32 +21,32 @@ export const TermsAndPrivacyModal: React.FC<TermsAndPrivacyModalProps> = ({
   const canProceed = acceptedTerms && acceptedPrivacy;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-3xl sm:max-w-4xl flex flex-col shadow-2xl my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-500/20 rounded-lg">
-              <Shield className="w-6 h-6 text-purple-400" />
+                <div className="flex items-center justify-between p-3 sm:p-4 md:p-6 border-b border-gray-700 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <div className="p-1.5 sm:p-2 bg-purple-500/20 rounded-lg shrink-0">
+              <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Welcome to Probalyze</h2>
-              <p className="text-sm text-gray-400">Please review and accept our terms</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-2xl font-bold text-white">Welcome to Probalyze</h2>
+              <p className="text-xs sm:text-sm text-gray-400">Please review and accept our terms</p>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-700">
+        <div className="flex border-b border-gray-700 overflow-x-auto">
           <button
             onClick={() => setActiveTab('terms')}
-            className={`flex-1 px-6 py-4 font-semibold transition-all ${
+            className={`flex-1 px-3 sm:px-6 py-3 sm:py-4 font-semibold transition-all text-sm sm:text-base whitespace-nowrap ${
               activeTab === 'terms'
                 ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-500/10'
                 : 'text-gray-400 hover:text-gray-300'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-1 sm:gap-2">
               <FileText className="w-4 h-4" />
               Terms & Conditions
             </div>
@@ -353,7 +353,7 @@ export const TermsAndPrivacyModal: React.FC<TermsAndPrivacyModalProps> = ({
           <button
             onClick={onAccept}
             disabled={!canProceed}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-blue-600"
+            className="flex-1 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-blue-600"
           >
             {canProceed ? 'Accept & Continue' : 'Please Accept Both'}
           </button>

@@ -263,21 +263,21 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   const topTraders = getTopTraders();
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="bg-gray-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-2">Place Your Bet</h2>
-            <p className="text-gray-400 text-sm line-clamp-2">{market.title}</p>
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gray-800 rounded-2xl p-4 sm:p-6 w-full max-w-sm sm:max-w-lg shadow-2xl my-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-start mb-4 sm:mb-6 gap-3">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">Place Your Bet</h2>
+            <p className="text-gray-400 text-xs sm:text-sm line-clamp-2">{market.title}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl">&times;</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl sm:text-2xl shrink-0 p-1">&times;</button>
         </div>
 
         {/* Toggle between Manual and Copy Trade */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-4 sm:mb-6">
           <button
             onClick={() => setShowCopyTrade(false)}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+            className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold transition-all text-sm sm:text-base ${
               !showCopyTrade
                 ? 'bg-purple-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -287,14 +287,15 @@ export const BettingModal: React.FC<BettingModalProps> = ({
           </button>
           <button
             onClick={() => setShowCopyTrade(true)}
-            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base ${
               showCopyTrade
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
             <Copy className="w-4 h-4" />
-            Copy Trade
+            <span className="hidden sm:inline">Copy Trade</span>
+            <span className="sm:hidden">Copy</span>
           </button>
         </div>
 

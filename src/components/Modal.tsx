@@ -51,16 +51,16 @@ export const Modal: React.FC<ModalProps> = ({ message, type, onClose, duration =
     return (
         <div 
             role="alert"
-            className={`fixed top-20 right-5 w-full max-w-md p-4 rounded-xl shadow-2xl text-white backdrop-blur-sm border z-[100] overflow-hidden ${typeClasses[type]} ${animationClasses}`}
+            className={`fixed top-16 sm:top-20 right-2 sm:right-5 w-auto max-w-xs sm:max-w-md p-3 sm:p-4 rounded-xl shadow-2xl text-white backdrop-blur-sm border z-50 overflow-hidden ${typeClasses[type]} ${animationClasses}`}
         >
-            <div className="flex items-start justify-between gap-4">
-                <p className="flex-grow text-base pt-1">{message}</p>
+            <div className="flex items-start justify-between gap-3">
+                <p className="grow text-xs sm:text-sm pt-1">{message}</p>
                 <button 
                     onClick={handleClose} 
-                    className="p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                    className="p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors shrink-0"
                     aria-label="Close notification"
                 >
-                    <XIcon className="w-5 h-5" />
+                    <XIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
             </div>
             <div 
