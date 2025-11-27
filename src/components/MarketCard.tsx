@@ -117,7 +117,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   };
 
   const getOutcomeBadge = () => {
-    if (market.marketType === 'multi-outcome') {
+    if (market.marketType === 'multi-outcome' || (market.outcomes && market.outcomes.length > 0)) {
       return (
         <div className="bg-purple-500 px-3 py-1.5 rounded-lg text-white text-xs font-bold flex items-center gap-1.5">
           <span>🗳️</span>
@@ -259,7 +259,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         </div>
         
         {/* Multi-Outcome Display */}
-        {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 ? (
+        {(market.marketType === 'multi-outcome' || (market.outcomes && market.outcomes.length > 0)) && market.outcomes && market.outcomes.length > 0 ? (
           <div className="space-y-2 mb-4">
             {(() => {
               const outcomeTotalPool = market.totalYesAmount + market.totalNoAmount;

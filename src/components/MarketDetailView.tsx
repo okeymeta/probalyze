@@ -395,7 +395,7 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
           </div>
 
           {/* Multi-Outcome Candidates Display */}
-          {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 && (
+          {(market.marketType === 'multi-outcome' || (market.outcomes && market.outcomes.length > 0)) && market.outcomes && market.outcomes.length > 0 && (
             <div className="glass-card rounded-xl p-6">
               <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 🗳️ All Candidates
