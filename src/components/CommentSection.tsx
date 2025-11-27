@@ -71,16 +71,38 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   };
 
   const handleLike = async (commentId: string) => {
-    if (!userWallet) return;
-    await toggleCommentLike(market.id, commentId, userWallet);
-    onCommentAdded();
+    if (!userWallet) {
+      setError('Connect wallet to like comments');
+      return;
+    }
+    setError(null);
+    try {
+      const result = await toggleCommentLike(market.id, commentId, userWallet);
+      if (result.success) {
+        onCommentAdded();
+      } else {
+        setError(result.error || 'Failed to update like');
+      }
+    } catch (err) {
+      setError('Error updating like');
+    }
   };
 
   const handleDelete = async (commentId: string) => {
-    if (!userWallet) return;
-    const result = await deleteMarketComment(market.id, commentId, userWallet);
-    if (result.success) {
-      onCommentAdded();
+    if (!userWallet) {
+      setError('Connect wallet to delete comments');
+      return;
+    }
+    setError(null);
+    try {
+      const result = await deleteMarketComment(market.id, commentId, userWallet);
+      if (result.success) {
+        onCommentAdded();
+      } else {
+        setError(result.error || 'Failed to delete comment');
+      }
+    } catch (err) {
+      setError('Error deleting comment');
     }
   };
 
