@@ -273,10 +273,22 @@ export const MarketCard: React.FC<MarketCardProps> = ({
                     <span className="text-base font-bold text-purple-400">{outcomePercentage.toFixed(0)}%</span>
                   </div>
                   <div className="flex gap-2">
-                    <button className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-xs font-bold py-2 rounded transition-all">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        (onBetClick as any)(market, outcome.id, 'yes');
+                      }}
+                      className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-xs font-bold py-2 rounded transition-all"
+                    >
                       Yes
                     </button>
-                    <button className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-xs font-bold py-2 rounded transition-all">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        (onBetClick as any)(market, outcome.id, 'no');
+                      }}
+                      className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-xs font-bold py-2 rounded transition-all"
+                    >
                       No
                     </button>
                   </div>

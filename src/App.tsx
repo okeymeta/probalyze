@@ -37,6 +37,7 @@ export const App: React.FC = () => {
     const [availableWallets, setAvailableWallets] = useState<DetectedWallet[]>([]);
     const [isConnecting, setIsConnecting] = useState(false);
     const [selectedMarketForBetting, setSelectedMarketForBetting] = useState<Market | null>(null);
+    const [selectedOutcomeId, setSelectedOutcomeId] = useState<string | undefined>(undefined);
     const [selectedMarketForResolving, setSelectedMarketForResolving] = useState<Market | null>(null);
     const [selectedMarketForViewing, setSelectedMarketForViewing] = useState<Market | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -253,12 +254,13 @@ export const App: React.FC = () => {
         setShowAdminDashboard(false);
     };
 
-    const handleBetClick = (market: Market) => {
+    const handleBetClick = (market: Market, outcomeId?: string) => {
         if (!publicKey) {
             showModal('Please connect your wallet first', 'error');
             return;
         }
         setSelectedMarketForBetting(market);
+        setSelectedOutcomeId(outcomeId);
     };
 
     const handleResolveClick = (market: Market) => {
@@ -593,8 +595,12 @@ export const App: React.FC = () => {
                     market={selectedMarketForBetting}
                     provider={provider}
                     userWallet={publicKey.toBase58()}
-                    onClose={() => setSelectedMarketForBetting(null)}
+                    onClose={() => {
+                        setSelectedMarketForBetting(null);
+                        setSelectedOutcomeId(undefined);
+                    }}
                     onBetPlaced={handleBetPlaced}
+                    outcomeId={selectedOutcomeId}
                 />
             )}
 

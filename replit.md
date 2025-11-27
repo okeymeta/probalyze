@@ -8,12 +8,13 @@ The application features real-time market charts, portfolio tracking, leaderboar
 
 ## Recent Updates (November 27, 2025)
 
-**Multi-Outcome Trading Implementation:**
-- YES/NO buttons on each candidate are now fully tradable
-- Users can place trades on individual candidates in multi-outcome markets
+**Complete Multi-Outcome Trading Implementation:**
+- YES/NO buttons on each candidate are fully tradable from both market cards AND detailed views
+- Users can place trades directly from market cards (no need to navigate to details)
 - Users can place multiple bets on different candidates in the same market
 - BettingModal now accepts `outcomeId` parameter for multi-outcome trades
-- `placeBet()` function updated to accept optional `outcomeId` and route to `placeBetOnOutcome()` internally
+- `placeBet()` function updated to accept optional `outcomeId` and automatically routes to `placeBetOnOutcome()`
+- App.tsx manages outcomeId state and passes it to BettingModal
 - All trades save to S3 storage with proper outcomeId linking
 - User balances update correctly after each trade
 
@@ -25,15 +26,16 @@ The application features real-time market charts, portfolio tracking, leaderboar
 - Filters display all new categories
 
 **Date Display Fixes:**
-- Fixed resolve date showing 1/1/1970 in MarketDetailView
+- Fixed resolve date showing 1/1/1970 in both MarketCard and MarketDetailView
 - Proper fallback logic: shows custom timing note for TBD markets, custom note for flexible timing, or formatted date for fixed timing
 - Validation added: only shows date if resolveTime > 0
 
 **Chart & Trading Data:**
-- Charts use real-time market pool data
-- Candlestick charts aggregate price movements from actual market trades
-- All bets persist in S3 storage with proper outcomeId associations
+- Charts use real-time market pool data from actual bets
+- Candlestick charts aggregate price movements realistically
+- All bets persist in S3 storage with outcomeId associations
 - User portfolio reflects all trades immediately
+- Multi-outcome markets properly track individual outcome performance
 
 ## User Preferences
 
@@ -59,18 +61,18 @@ Preferred communication style: Simple, everyday language.
 
 **Multi-Outcome Markets**: MarketCard and MarketDetailView components now support:
 - Displaying multiple candidates/outcomes in a grid
-- Each outcome shows name, percentage, and YES/NO buttons
-- YES/NO buttons are fully functional and tradable
+- Each outcome shows name, percentage, and clickable YES/NO buttons
+- YES/NO buttons functional from both market card AND detailed view
 - Full backward compatibility with binary (simple) markets
 - Proper data persistence with outcomeId tracking
 
 ### Trading System
 
 **Multi-Outcome Trading Flow**:
-1. User clicks YES/NO on a candidate in a multi-outcome market
+1. User clicks YES/NO on a candidate (from market card or detail view)
 2. BettingModal opens with `outcomeId` parameter
-3. placeBet() is called with outcomeId
-4. System routes to placeBetOnOutcome() for multi-outcome processing
+3. `placeBet()` is called with outcomeId
+4. System routes to `placeBetOnOutcome()` for multi-outcome processing
 5. Bet is recorded with outcomeId linking
 6. User balance updated in S3 storage
 7. Market totals and pool percentages recalculated
@@ -79,7 +81,7 @@ Preferred communication style: Simple, everyday language.
 **Binary Trading Flow** (unchanged):
 1. User clicks YES/NO on a simple market
 2. BettingModal opens without outcomeId
-3. placeBet() handles as simple bet (no outcomeId)
+3. `placeBet()` handles as simple bet (no outcomeId)
 4. Bet recorded with prediction only
 5. Market totals updated
 6. Storage persists changes
