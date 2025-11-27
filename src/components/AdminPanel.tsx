@@ -52,7 +52,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
     { value: 'weather', label: 'Weather', icon: '🌤️' },
     { value: 'science', label: 'Science', icon: '🔬' },
     { value: 'esports', label: 'E-Sports', icon: '🎮' },
-    { value: 'blockchain', label: 'Blockchain', icon: '⛓️' },
+    { value: 'ai', label: 'AI', icon: '🤖' },
     { value: 'other', label: 'Other', icon: '📊' }
   ];
 

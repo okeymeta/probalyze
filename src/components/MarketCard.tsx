@@ -86,7 +86,10 @@ export const MarketCard: React.FC<MarketCardProps> = ({
     if (market.timingType === 'flexible') {
       return market.timingNote ? `${market.timingNote}` : `${new Date(market.resolveTime).toLocaleDateString()}`;
     }
-    return new Date(market.resolveTime).toLocaleDateString();
+    if (market.resolveTime && market.resolveTime > 0) {
+      return new Date(market.resolveTime).toLocaleDateString();
+    }
+    return 'TBD';
   };
 
   const getStatusBadge = () => {

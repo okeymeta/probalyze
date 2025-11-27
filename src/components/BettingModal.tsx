@@ -12,6 +12,7 @@ interface BettingModalProps {
   userWallet: string;
   onClose: () => void;
   onBetPlaced: () => void;
+  outcomeId?: string; // For multi-outcome markets
 }
 
 export const BettingModal: React.FC<BettingModalProps> = ({ 
@@ -19,7 +20,8 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   provider, 
   userWallet, 
   onClose, 
-  onBetPlaced 
+  onBetPlaced,
+  outcomeId
 }) => {
   const [prediction, setPrediction] = useState<PredictionOption>('yes');
   const [amount, setAmount] = useState<string>('');
@@ -90,7 +92,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
       );
 
       // Record bet in storage
-      const result = await placeBet(market.id, userWallet, betAmount, prediction, signature);
+      const result = await placeBet(market.id, userWallet, betAmount, prediction, signature, outcomeId);
 
       if (result.success) {
         onBetPlaced();

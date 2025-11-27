@@ -900,14 +900,20 @@ export const resolveMultiOutcomeMarket = async (
   }
 }
 
-// Place a bet on a market
+// Place a bet on a market (supports both simple and multi-outcome)
 export const placeBet = async (
   marketId: string,
   walletAddress: string,
   amount: number,
   prediction: PredictionOption,
-  transactionSignature: string
+  transactionSignature: string,
+  outcomeId?: string
 ): Promise<{ success: boolean; error?: string }> => {
+  // If outcomeId is provided, route to multi-outcome bet handler
+  if (outcomeId) {
+    return placeBetOnOutcome(marketId, outcomeId, walletAddress, amount, prediction, transactionSignature)
+  }
+
   try {
     const markets = await loadMarkets()
     const marketIndex = markets.findIndex(m => m.id === marketId)

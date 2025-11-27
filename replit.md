@@ -8,23 +8,32 @@ The application features real-time market charts, portfolio tracking, leaderboar
 
 ## Recent Updates (November 27, 2025)
 
-**Multi-Outcome Markets & UI Enhancements:**
-- Implemented multi-outcome market display with individual candidate cards showing YES/NO buttons
-- Each candidate displays its percentage of the total pool
-- Market cards now show candidates in a grid layout (similar to election markets with candidates like "J.D. Vance", "Gavin Newsom")
-- Fixed date/time display: shows custom timing notes when admin doesn't set specific date (supports TBD, flexible, and fixed timing types)
-- Real-time comment updates with likes/deletes without page refresh
-- Comment system fully functional with instant UI updates
+**Multi-Outcome Trading Implementation:**
+- YES/NO buttons on each candidate are now fully tradable
+- Users can place trades on individual candidates in multi-outcome markets
+- Users can place multiple bets on different candidates in the same market
+- BettingModal now accepts `outcomeId` parameter for multi-outcome trades
+- `placeBet()` function updated to accept optional `outcomeId` and route to `placeBetOnOutcome()` internally
+- All trades save to S3 storage with proper outcomeId linking
+- User balances update correctly after each trade
 
-**Expanded Market Categories:**
-- Added 13 categories: crypto, politics, elections, sports, entertainment, technology, economy, finance, weather, science, esports, blockchain, other
-- Categories now available in AdminPanel for market creation
-- Category badges display on market cards for quick identification
+**Category Updates:**
+- Removed "blockchain" category
+- Added "AI" category (icon: 🤖)
+- Categories now: crypto, politics, elections, sports, entertainment, technology, economy, finance, weather, science, esports, AI, other
+- Admin can select from all 13 categories when creating markets
+- Filters display all new categories
 
-**Bug Fixes:**
-- Fixed undefined likes array error in comment system
-- Resolved LSP type errors in MarketDetailView
-- Binary market display preserved for backward compatibility
+**Date Display Fixes:**
+- Fixed resolve date showing 1/1/1970 in MarketDetailView
+- Proper fallback logic: shows custom timing note for TBD markets, custom note for flexible timing, or formatted date for fixed timing
+- Validation added: only shows date if resolveTime > 0
+
+**Chart & Trading Data:**
+- Charts use real-time market pool data
+- Candlestick charts aggregate price movements from actual market trades
+- All bets persist in S3 storage with proper outcomeId associations
+- User portfolio reflects all trades immediately
 
 ## User Preferences
 
@@ -46,12 +55,34 @@ Preferred communication style: Simple, everyday language.
 
 **Routing**: Single-page application with manual page state management (no React Router). Navigation between Markets, Portfolio, and Leaderboard pages is handled via a `currentPage` state variable.
 
-**Chart Visualization**: Recharts library for rendering market price charts with area and candlestick views, including volume indicators and real-time price updates.
+**Chart Visualization**: Recharts library for rendering market price charts with area and candlestick views, including volume indicators and real-time price updates. Charts use actual bet data from the storage for realistic price movements.
 
 **Multi-Outcome Markets**: MarketCard and MarketDetailView components now support:
 - Displaying multiple candidates/outcomes in a grid
 - Each outcome shows name, percentage, and YES/NO buttons
+- YES/NO buttons are fully functional and tradable
 - Full backward compatibility with binary (simple) markets
+- Proper data persistence with outcomeId tracking
+
+### Trading System
+
+**Multi-Outcome Trading Flow**:
+1. User clicks YES/NO on a candidate in a multi-outcome market
+2. BettingModal opens with `outcomeId` parameter
+3. placeBet() is called with outcomeId
+4. System routes to placeBetOnOutcome() for multi-outcome processing
+5. Bet is recorded with outcomeId linking
+6. User balance updated in S3 storage
+7. Market totals and pool percentages recalculated
+8. UI updates immediately with new market state
+
+**Binary Trading Flow** (unchanged):
+1. User clicks YES/NO on a simple market
+2. BettingModal opens without outcomeId
+3. placeBet() handles as simple bet (no outcomeId)
+4. Bet recorded with prediction only
+5. Market totals updated
+6. Storage persists changes
 
 ### Blockchain Integration
 
@@ -73,11 +104,25 @@ Preferred communication style: Simple, everyday language.
 **Primary Storage**: S3-compatible storage (Supabase S3) for JSON-based data persistence.
 
 **Storage Files**:
-- `markets.json` - All market data including bets, prices, status, multi-outcome details
+- `markets.json` - All market data including bets with outcomeId, prices, status, multi-outcome details
 - `balances.json` - User balance tracking for deposits/withdrawals
 - `platform-stats.json` - Global platform statistics
 - `user-agreements.json` - Terms of service acceptance tracking
 - `copy-trades.json` - Copy trading action history
+
+**Bet Structure with Multi-Outcome Support**:
+```typescript
+interface Bet {
+  id: string;
+  walletAddress: string;
+  amount: number; // net amount after platform fee
+  prediction: 'yes' | 'no';
+  timestamp: number;
+  transactionSignature: string;
+  platformFee: number;
+  outcomeId?: string; // For multi-outcome markets
+}
+```
 
 **Database Schema** (Drizzle + Turso): Optional relational database layer defined but not actively used in the current implementation. Schema includes:
 - `users` table - Wallet addresses and balance tracking
@@ -85,7 +130,7 @@ Preferred communication style: Simple, everyday language.
 - `bets` table - Individual bet records
 - `platform_stats` table - Aggregated statistics
 
-**Rationale**: The JSON file approach provides simplicity and direct S3 compatibility, avoiding the need for database infrastructure. However, this creates scaling limitations and potential race conditions with concurrent writes.
+**Rationale**: The JSON file approach provides simplicity and direct S3 compatibility, avoiding the need for database infrastructure. The outcomeId field enables proper multi-outcome market tracking without requiring schema changes.
 
 ### Market Resolution System
 
@@ -93,19 +138,20 @@ Preferred communication style: Simple, everyday language.
 
 **Market Types**:
 - **Binary (Simple)**: YES/NO outcomes
-- **Multi-Outcome**: Multiple candidates/options, each with YES/NO betting
+- **Multi-Outcome**: Multiple candidates/options, each with YES/NO betting and independent price tracking
 
 **Timing Types**:
-- **Fixed**: Specific date/time
-- **Flexible**: Date range with custom note
-- **TBD**: To be determined, displays custom timing note
+- **Fixed**: Specific date/time (displays formatted date)
+- **Flexible**: Date range with custom note (displays custom note or date fallback)
+- **TBD**: To be determined (displays custom timing note or "TBD")
 
 **Resolution Process**:
-1. Admin selects winning outcome (YES/NO for binary, or winning outcome for multi-outcome)
+1. Admin selects winning outcome (YES/NO for binary, or winning outcome ID for multi-outcome)
 2. System calculates winner payouts based on proportional pool distribution
-3. Settlement fee deducted from winnings
-4. User balances updated in storage
-5. Market status changed to "resolved"
+3. For multi-outcome: only bettors who picked YES on the winning outcome receive payouts
+4. Settlement fee deducted from winnings
+5. User balances updated in storage
+6. Market status changed to "resolved"
 
 **Refund Logic**: Markets with only one bettor are automatically refunded to prevent guaranteed losses.
 
