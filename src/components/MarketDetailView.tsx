@@ -185,6 +185,16 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
     return `${mins}m`;
   };
 
+  const getResolveDisplay = () => {
+    if (market.timingType === 'tbd' || !market.resolveTime) {
+      return market.timingNote ? `${market.timingNote}` : 'TBD';
+    }
+    if (market.timingType === 'flexible') {
+      return market.timingNote ? `${market.timingNote}` : `${new Date(market.resolveTime).toLocaleDateString()}`;
+    }
+    return new Date(market.resolveTime).toLocaleDateString();
+  };
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -345,41 +355,69 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
               )}
             </div>
 
-            {/* Price Display */}
-            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs text-gray-500 uppercase font-bold">Yes</span>
-                  {priceChange > 0 && <TrendingUp className="w-4 h-4 text-green-400" />}
+            {/* Multi-Outcome Display */}
+            {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 ? (
+              <div className="space-y-3">
+                {market.outcomes.map((outcome) => {
+                  const outcomeTotal = outcome.totalYesAmount + outcome.totalNoAmount;
+                  const outcomeTotalPool = market.totalYesAmount + market.totalNoAmount;
+                  const outcomePercentage = outcomeTotalPool > 0 ? (outcomeTotal / outcomeTotalPool) * 100 : 0;
+                  
+                  return (
+                    <div key={outcome.id} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-lg font-bold text-white">{outcome.name}</h3>
+                        <span className="text-2xl font-bold text-purple-400">{outcomePercentage.toFixed(0)}%</span>
+                      </div>
+                      <div className="flex gap-3">
+                        <button className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 py-3 rounded-lg font-bold transition-all">
+                          Yes
+                        </button>
+                        <button className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 py-3 rounded-lg font-bold transition-all">
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Binary Market Price Display */
+              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-gray-500 uppercase font-bold">Yes</span>
+                    {priceChange > 0 && <TrendingUp className="w-4 h-4 text-green-400" />}
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-green-400">{yesPercentage.toFixed(1)}%</span>
+                    {priceChange !== 0 && (
+                      <span className={`text-sm font-bold ${priceChange > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)}%
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Users className="w-3 h-3 text-green-400/70" />
+                    <span className="text-xs text-green-400/70">{market.uniqueYesBettors.length} traders</span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-green-400">{yesPercentage.toFixed(1)}%</span>
-                  {priceChange !== 0 && (
-                    <span className={`text-sm font-bold ${priceChange > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)}%
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 mt-1">
-                  <Users className="w-3 h-3 text-green-400/70" />
-                  <span className="text-xs text-green-400/70">{market.uniqueYesBettors.length} traders</span>
+                
+                <div className="text-right">
+                  <div className="flex items-center justify-end gap-2 mb-1">
+                    {priceChange < 0 && <TrendingDown className="w-4 h-4 text-red-400" />}
+                    <span className="text-xs text-gray-500 uppercase font-bold">No</span>
+                  </div>
+                  <div className="flex items-baseline justify-end gap-2">
+                    <span className="text-4xl font-bold text-red-400">{noPercentage.toFixed(1)}%</span>
+                  </div>
+                  <div className="flex items-center justify-end gap-1 mt-1">
+                    <span className="text-xs text-red-400/70">{market.uniqueNoBettors.length} traders</span>
+                    <Users className="w-3 h-3 text-red-400/70" />
+                  </div>
                 </div>
               </div>
-              
-              <div className="text-right">
-                <div className="flex items-center justify-end gap-2 mb-1">
-                  {priceChange < 0 && <TrendingDown className="w-4 h-4 text-red-400" />}
-                  <span className="text-xs text-gray-500 uppercase font-bold">No</span>
-                </div>
-                <div className="flex items-baseline justify-end gap-2">
-                  <span className="text-4xl font-bold text-red-400">{noPercentage.toFixed(1)}%</span>
-                </div>
-                <div className="flex items-center justify-end gap-1 mt-1">
-                  <span className="text-xs text-red-400/70">{market.uniqueNoBettors.length} traders</span>
-                  <Users className="w-3 h-3 text-red-400/70" />
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Chart Section */}

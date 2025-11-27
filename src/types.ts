@@ -29,7 +29,7 @@ export interface Task {
 // Prediction Market Types
 export type MarketStatus = 'active' | 'closed' | 'resolved';
 export type PredictionOption = 'yes' | 'no';
-export type MarketCategory = 'crypto' | 'politics' | 'sports' | 'entertainment' | 'technology' | 'economy' | 'other';
+export type MarketCategory = 'crypto' | 'politics' | 'sports' | 'entertainment' | 'technology' | 'economy' | 'finance' | 'weather' | 'science' | 'elections' | 'esports' | 'blockchain' | 'other';
 export type MarketType = 'simple' | 'multi-outcome';
 export type TimingType = 'fixed' | 'flexible' | 'tbd';
 

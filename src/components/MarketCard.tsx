@@ -78,6 +78,17 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   const isDescriptionLong = market.description.length > 100;
   const truncatedDescription = market.description.slice(0, 100);
 
+  // Format resolve date/time
+  const getResolveDisplay = () => {
+    if (market.timingType === 'tbd' || !market.resolveTime) {
+      return market.timingNote ? `${market.timingNote}` : 'TBD';
+    }
+    if (market.timingType === 'flexible') {
+      return market.timingNote ? `${market.timingNote}` : `${new Date(market.resolveTime).toLocaleDateString()}`;
+    }
+    return new Date(market.resolveTime).toLocaleDateString();
+  };
+
   const getStatusBadge = () => {
     if (market.status === 'active') {
       return (
@@ -244,51 +255,79 @@ export const MarketCard: React.FC<MarketCardProps> = ({
           )}
         </div>
         
-        {/* Price Display - DexScreener style */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold">Yes</span>
-              {priceChange > 0 && <TrendingUp className="w-3 h-3 text-green-400" />}
+        {/* Multi-Outcome Display */}
+        {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 ? (
+          <div className="space-y-2 mb-4">
+            {market.outcomes.map((outcome) => {
+              const outcomeTotal = outcome.totalYesAmount + outcome.totalNoAmount;
+              const outcomeTotalPool = market.totalYesAmount + market.totalNoAmount;
+              const outcomePercentage = outcomeTotalPool > 0 ? (outcomeTotal / outcomeTotalPool) * 100 : 0;
+              
+              return (
+                <div key={outcome.id} className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-white">{outcome.name}</span>
+                    <span className="text-base font-bold text-purple-400">{outcomePercentage.toFixed(0)}%</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-xs font-bold py-2 rounded transition-all">
+                      Yes
+                    </button>
+                    <button className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-xs font-bold py-2 rounded transition-all">
+                      No
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* Price Display - DexScreener style (Binary markets) */
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold">Yes</span>
+                {priceChange > 0 && <TrendingUp className="w-3 h-3 text-green-400" />}
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl sm:text-3xl font-bold text-green-400 percentage-badge">{yesPercentage.toFixed(0)}%</span>
+                {priceChange !== 0 && (
+                  <span className={`text-xs font-bold ${
+                    priceChange > 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)}%
+                  </span>
+                )}
+              </div>
+              {/* Unique Yes Bettors */}
+              <div className="flex items-center gap-1 mt-1">
+                <Users className="w-3 h-3 text-green-400/70" />
+                <span className="text-xs text-green-400/70 font-semibold">{market.uniqueYesBettors.length} traders</span>
+              </div>
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-bold text-green-400 percentage-badge">{yesPercentage.toFixed(0)}%</span>
-              {priceChange !== 0 && (
-                <span className={`text-xs font-bold ${
-                  priceChange > 0 ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)}%
-                </span>
-              )}
-            </div>
-            {/* Unique Yes Bettors */}
-            <div className="flex items-center gap-1 mt-1">
-              <Users className="w-3 h-3 text-green-400/70" />
-              <span className="text-xs text-green-400/70 font-semibold">{market.uniqueYesBettors.length} traders</span>
+            <div className="flex-1 text-right">
+              <div className="flex items-center justify-end gap-2 mb-1">
+                {priceChange < 0 && <TrendingDown className="w-3 h-3 text-red-400" />}
+                <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold">No</span>
+              </div>
+              <div className="flex items-baseline justify-end gap-1.5">
+                {priceChange !== 0 && (
+                  <span className={`text-xs font-bold ${
+                    priceChange < 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {priceChange < 0 ? '+' : ''}{(-priceChange).toFixed(1)}%
+                  </span>
+                )}
+                <span className="text-2xl sm:text-3xl font-bold text-red-400 percentage-badge">{noPercentage.toFixed(0)}%</span>
+              </div>
+              {/* Unique No Bettors */}
+              <div className="flex items-center justify-end gap-1 mt-1">
+                <span className="text-xs text-red-400/70 font-semibold">{market.uniqueNoBettors.length} traders</span>
+                <Users className="w-3 h-3 text-red-400/70" />
+              </div>
             </div>
           </div>
-          <div className="flex-1 text-right">
-            <div className="flex items-center justify-end gap-2 mb-1">
-              {priceChange < 0 && <TrendingDown className="w-3 h-3 text-red-400" />}
-              <span className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold">No</span>
-            </div>
-            <div className="flex items-baseline justify-end gap-1.5">
-              {priceChange !== 0 && (
-                <span className={`text-xs font-bold ${
-                  priceChange < 0 ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {priceChange < 0 ? '+' : ''}{(-priceChange).toFixed(1)}%
-                </span>
-              )}
-              <span className="text-2xl sm:text-3xl font-bold text-red-400 percentage-badge">{noPercentage.toFixed(0)}%</span>
-            </div>
-            {/* Unique No Bettors */}
-            <div className="flex items-center justify-end gap-1 mt-1">
-              <span className="text-xs text-red-400/70 font-semibold">{market.uniqueNoBettors.length} traders</span>
-              <Users className="w-3 h-3 text-red-400/70" />
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Probability Bar */}
         <div className="w-full bg-gray-800 rounded-full h-1.5 sm:h-2 overflow-hidden mb-4">
@@ -457,7 +496,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-700/50 flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-xs text-gray-500">
           <span>Created {new Date(market.createdAt).toLocaleDateString()}</span>
           {market.status === 'active' && (
-            <span className="text-blue-400">Resolves {new Date(market.resolveTime).toLocaleDateString()}</span>
+            <span className="text-blue-400">Resolves {getResolveDisplay()}</span>
           )}
           {market.platformFeesCollected > 0 && (
             <span className="text-purple-400 font-semibold number-mono">
