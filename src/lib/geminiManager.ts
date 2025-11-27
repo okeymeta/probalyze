@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+// Get API key from environment (Replit secrets or .env)
+const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
 
 // Lazy initialization to avoid errors when key is missing
 let aiClient: GoogleGenAI | null = null;

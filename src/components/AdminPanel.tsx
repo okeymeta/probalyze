@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { createMarket } from '../lib/marketManager';
 import { uploadImage } from '../lib/storageManager';
+import { generateMarketDescription } from '../lib/geminiManager';
 import { MarketCategory, MarketType, TimingType } from '../types';
 import SpinnerIcon from './icons/SpinnerIcon';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, Wand2 } from 'lucide-react';
 
 interface OutcomeInput {
   id: string;
@@ -30,6 +31,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
@@ -293,11 +295,39 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
         </div>
 
         <div>
-          <label className="block text-gray-300 mb-2 font-semibold">Description</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-gray-300 font-semibold">Description</label>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!title.trim()) {
+                  setError('Please enter a title first');
+                  return;
+                }
+                setIsGenerating(true);
+                setError(null);
+                try {
+                  const generated = await generateMarketDescription(title, category);
+                  setDescription(generated);
+                  setSuccess('Description generated with AI! ✨');
+                  setTimeout(() => setSuccess(null), 3000);
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : 'Failed to generate description');
+                } finally {
+                  setIsGenerating(false);
+                }
+              }}
+              disabled={isGenerating || !title.trim()}
+              className="flex items-center gap-1 px-3 py-1 text-sm rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <Wand2 className="w-4 h-4" />
+              {isGenerating ? 'Generating...' : 'Generate'}
+            </button>
+          </div>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Provide details about the market conditions, resolution criteria, etc."
+            placeholder="Provide details about the market conditions, resolution criteria, etc. Or click Generate to use AI!"
             className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
             rows={3}
             maxLength={1000}
