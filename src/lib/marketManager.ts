@@ -1,4 +1,4 @@
-import { Market, MarketData, Bet, PredictionOption, MarketStatus, ChartDataPoint, UserBalance, PlatformStats, MarketCategory, UserAgreement, CopyTradeAction } from '../types'
+import { Market, MarketData, Bet, PredictionOption, MarketStatus, ChartDataPoint, UserBalance, PlatformStats, MarketCategory, UserAgreement, CopyTradeAction, MarketType, TimingType, MarketOutcome, MarketNews, MarketComment, MarketRule } from '../types'
 import { uploadJSONFile, downloadJSONFile } from './s3Storage'
 import { ADMIN_WALLET_ADDRESS, PLATFORM_FEE_PERCENTAGE, SETTLEMENT_FEE_PERCENTAGE } from '../constants'
 
@@ -259,52 +259,117 @@ export const saveCopyTrade = async (copyTrade: CopyTradeAction): Promise<boolean
   }
 }
 
-// Create a new market (admin only)
+// Create market options for multi-outcome and simple markets
+interface CreateMarketOptions {
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: MarketCategory;
+  marketType: MarketType;
+  initialYesPrice: number;
+  timingType: TimingType;
+  closesAt?: number | null;
+  resolveTime?: number | null;
+  timingNote?: string;
+  outcomes?: { name: string; imageUrl?: string }[];
+  rules?: string[];
+  adminWallet: string;
+}
+
+// Create a new market (admin only) - supports both simple and multi-outcome
 export const createMarket = async (
-  title: string,
-  description: string,
-  imageUrl: string,
-  category: MarketCategory,
-  initialYesPrice: number,
-  closesAt: number,
-  resolveTime: number,
-  adminWallet: string
+  titleOrOptions: string | CreateMarketOptions,
+  description?: string,
+  imageUrl?: string,
+  category?: MarketCategory,
+  initialYesPrice?: number,
+  closesAt?: number,
+  resolveTime?: number,
+  adminWallet?: string
 ): Promise<{ success: boolean; marketId?: string; error?: string }> => {
-  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+  let options: CreateMarketOptions;
+  
+  if (typeof titleOrOptions === 'string') {
+    options = {
+      title: titleOrOptions,
+      description: description || '',
+      imageUrl: imageUrl || '',
+      category: category || 'other',
+      marketType: 'simple',
+      initialYesPrice: initialYesPrice || 0.5,
+      timingType: 'fixed',
+      closesAt: closesAt || null,
+      resolveTime: resolveTime || null,
+      adminWallet: adminWallet || ''
+    };
+  } else {
+    options = titleOrOptions;
+  }
+
+  if (options.adminWallet !== ADMIN_WALLET_ADDRESS) {
     return { success: false, error: 'Unauthorized: Only admin can create markets' }
   }
 
   try {
     const markets = await loadMarkets()
     
+    const marketOutcomes: MarketOutcome[] | undefined = options.marketType === 'multi-outcome' && options.outcomes
+      ? options.outcomes.map((o, idx) => ({
+          id: `outcome-${Date.now()}-${idx}-${Math.random().toString(36).substring(7)}`,
+          name: o.name,
+          imageUrl: o.imageUrl,
+          totalYesAmount: 0,
+          totalNoAmount: 0,
+          yesPrice: options.initialYesPrice,
+          noPrice: 1 - options.initialYesPrice,
+          uniqueYesBettors: [],
+          uniqueNoBettors: []
+        }))
+      : undefined;
+
+    const marketRules: MarketRule[] = options.rules 
+      ? options.rules.map((r, idx) => ({
+          id: `rule-${Date.now()}-${idx}`,
+          content: r,
+          order: idx
+        }))
+      : [];
+    
     const newMarket: Market = {
       id: `market-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-      title,
-      description,
-      imageUrl,
-      category,
-      initialYesPrice,
+      title: options.title,
+      description: options.description,
+      imageUrl: options.imageUrl,
+      category: options.category,
+      marketType: options.marketType,
+      initialYesPrice: options.initialYesPrice,
       createdAt: Date.now(),
-      closesAt,
-      resolveTime,
+      closesAt: options.closesAt || null,
+      resolveTime: options.resolveTime || null,
+      timingType: options.timingType,
+      timingNote: options.timingNote,
       resolvedAt: null,
       status: 'active',
       outcome: null,
       totalYesAmount: 0,
       totalNoAmount: 0,
       bets: [],
-      createdBy: adminWallet,
+      createdBy: options.adminWallet,
       volume24h: 0,
+      totalVolume: 0,
       platformFeesCollected: 0,
       uniqueYesBettors: [],
-      uniqueNoBettors: []
+      uniqueNoBettors: [],
+      outcomes: marketOutcomes,
+      news: [],
+      comments: [],
+      rules: marketRules
     }
 
     markets.unshift(newMarket)
     const saved = await saveMarkets(markets)
 
     if (saved) {
-      // Update platform stats
       const stats = await loadPlatformStats()
       stats.activeMarkets = markets.filter(m => m.status === 'active').length
       await savePlatformStats(stats)
@@ -315,6 +380,518 @@ export const createMarket = async (
     }
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Edit an existing market (admin only)
+export const editMarket = async (
+  marketId: string,
+  updates: Partial<Pick<Market, 'title' | 'description' | 'imageUrl' | 'category' | 'closesAt' | 'resolveTime' | 'timingType' | 'timingNote'>>,
+  adminWallet: string
+): Promise<{ success: boolean; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, error: 'Unauthorized: Only admin can edit markets' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const marketIndex = markets.findIndex(m => m.id === marketId)
+
+    if (marketIndex === -1) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    const market = markets[marketIndex]
+    
+    Object.assign(market, updates, {
+      lastEditedAt: Date.now(),
+      lastEditedBy: adminWallet
+    })
+
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true } : { success: false, error: 'Failed to save changes' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Delete a market (admin only)
+export const deleteMarket = async (
+  marketId: string,
+  adminWallet: string
+): Promise<{ success: boolean; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, error: 'Unauthorized: Only admin can delete markets' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const marketIndex = markets.findIndex(m => m.id === marketId)
+
+    if (marketIndex === -1) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    const market = markets[marketIndex]
+    
+    if (market.bets.length > 0) {
+      return { success: false, error: 'Cannot delete market with existing bets' }
+    }
+
+    markets.splice(marketIndex, 1)
+    const saved = await saveMarkets(markets)
+
+    if (saved) {
+      const stats = await loadPlatformStats()
+      stats.activeMarkets = markets.filter(m => m.status === 'active').length
+      await savePlatformStats(stats)
+      return { success: true }
+    }
+    return { success: false, error: 'Failed to delete market' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Add news to a market (admin only)
+export const addMarketNews = async (
+  marketId: string,
+  content: string,
+  link: string | undefined,
+  adminWallet: string
+): Promise<{ success: boolean; newsId?: string; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, error: 'Unauthorized: Only admin can post news' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    const news: MarketNews = {
+      id: `news-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      content,
+      link,
+      createdAt: Date.now(),
+      createdBy: adminWallet
+    }
+
+    if (!market.news) market.news = []
+    market.news.unshift(news)
+
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true, newsId: news.id } : { success: false, error: 'Failed to save news' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Delete news from a market (admin only)
+export const deleteMarketNews = async (
+  marketId: string,
+  newsId: string,
+  adminWallet: string
+): Promise<{ success: boolean; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, error: 'Unauthorized: Only admin can delete news' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    if (!market.news) {
+      return { success: false, error: 'News not found' }
+    }
+
+    const newsIndex = market.news.findIndex(n => n.id === newsId)
+    if (newsIndex === -1) {
+      return { success: false, error: 'News not found' }
+    }
+
+    market.news.splice(newsIndex, 1)
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true } : { success: false, error: 'Failed to delete news' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Add comment to a market
+export const addMarketComment = async (
+  marketId: string,
+  walletAddress: string,
+  content: string,
+  parentId?: string
+): Promise<{ success: boolean; commentId?: string; error?: string }> => {
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    const comment: MarketComment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      walletAddress,
+      content,
+      timestamp: Date.now(),
+      likes: [],
+      parentId
+    }
+
+    if (!market.comments) market.comments = []
+    market.comments.push(comment)
+
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true, commentId: comment.id } : { success: false, error: 'Failed to save comment' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Like/unlike a comment
+export const toggleCommentLike = async (
+  marketId: string,
+  commentId: string,
+  walletAddress: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market || !market.comments) {
+      return { success: false, error: 'Market or comments not found' }
+    }
+
+    const comment = market.comments.find(c => c.id === commentId)
+    if (!comment) {
+      return { success: false, error: 'Comment not found' }
+    }
+
+    const likeIndex = comment.likes.indexOf(walletAddress)
+    if (likeIndex > -1) {
+      comment.likes.splice(likeIndex, 1)
+    } else {
+      comment.likes.push(walletAddress)
+    }
+
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true } : { success: false, error: 'Failed to update like' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Delete a comment (admin or comment author)
+export const deleteMarketComment = async (
+  marketId: string,
+  commentId: string,
+  walletAddress: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market || !market.comments) {
+      return { success: false, error: 'Market or comments not found' }
+    }
+
+    const commentIndex = market.comments.findIndex(c => c.id === commentId)
+    if (commentIndex === -1) {
+      return { success: false, error: 'Comment not found' }
+    }
+
+    const comment = market.comments[commentIndex]
+    if (comment.walletAddress !== walletAddress && walletAddress !== ADMIN_WALLET_ADDRESS) {
+      return { success: false, error: 'Unauthorized: Can only delete your own comments' }
+    }
+
+    market.comments.splice(commentIndex, 1)
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true } : { success: false, error: 'Failed to delete comment' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Update market rules (admin only)
+export const updateMarketRules = async (
+  marketId: string,
+  rules: string[],
+  adminWallet: string
+): Promise<{ success: boolean; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, error: 'Unauthorized: Only admin can update rules' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    market.rules = rules.map((r, idx) => ({
+      id: `rule-${Date.now()}-${idx}`,
+      content: r,
+      order: idx
+    }))
+
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true } : { success: false, error: 'Failed to update rules' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Add outcome to multi-outcome market (admin only)
+export const addMarketOutcome = async (
+  marketId: string,
+  name: string,
+  imageUrl: string | undefined,
+  adminWallet: string
+): Promise<{ success: boolean; outcomeId?: string; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, error: 'Unauthorized: Only admin can add outcomes' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+
+    if (!market) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    if (market.marketType !== 'multi-outcome') {
+      return { success: false, error: 'Can only add outcomes to multi-outcome markets' }
+    }
+
+    const outcome: MarketOutcome = {
+      id: `outcome-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      name,
+      imageUrl,
+      totalYesAmount: 0,
+      totalNoAmount: 0,
+      yesPrice: market.initialYesPrice,
+      noPrice: 1 - market.initialYesPrice,
+      uniqueYesBettors: [],
+      uniqueNoBettors: []
+    }
+
+    if (!market.outcomes) market.outcomes = []
+    market.outcomes.push(outcome)
+
+    const saved = await saveMarkets(markets)
+    return saved ? { success: true, outcomeId: outcome.id } : { success: false, error: 'Failed to add outcome' }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Place bet on multi-outcome market
+export const placeBetOnOutcome = async (
+  marketId: string,
+  outcomeId: string,
+  walletAddress: string,
+  amount: number,
+  prediction: PredictionOption,
+  transactionSignature: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const markets = await loadMarkets()
+    const marketIndex = markets.findIndex(m => m.id === marketId)
+
+    if (marketIndex === -1) {
+      return { success: false, error: 'Market not found' }
+    }
+
+    const market = markets[marketIndex]
+
+    if (market.status !== 'active') {
+      return { success: false, error: 'Market is not active' }
+    }
+
+    if (market.closesAt && Date.now() >= market.closesAt) {
+      market.status = 'closed'
+      await saveMarkets(markets)
+      return { success: false, error: 'Market has closed for betting' }
+    }
+
+    if (market.marketType !== 'multi-outcome' || !market.outcomes) {
+      return { success: false, error: 'This is not a multi-outcome market' }
+    }
+
+    const outcome = market.outcomes.find(o => o.id === outcomeId)
+    if (!outcome) {
+      return { success: false, error: 'Outcome not found' }
+    }
+
+    const platformFee = amount * (PLATFORM_FEE_PERCENTAGE / 100)
+    const netAmount = amount - platformFee
+
+    const newBet: Bet = {
+      id: `bet-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      walletAddress,
+      amount: netAmount,
+      prediction,
+      timestamp: Date.now(),
+      transactionSignature,
+      platformFee,
+      outcomeId
+    }
+
+    market.bets.push(newBet)
+
+    if (prediction === 'yes') {
+      outcome.totalYesAmount += netAmount
+      if (!outcome.uniqueYesBettors.includes(walletAddress)) {
+        outcome.uniqueYesBettors.push(walletAddress)
+      }
+    } else {
+      outcome.totalNoAmount += netAmount
+      if (!outcome.uniqueNoBettors.includes(walletAddress)) {
+        outcome.uniqueNoBettors.push(walletAddress)
+      }
+    }
+
+    const totalOutcome = outcome.totalYesAmount + outcome.totalNoAmount
+    if (totalOutcome > 0) {
+      outcome.yesPrice = outcome.totalYesAmount / totalOutcome
+      outcome.noPrice = outcome.totalNoAmount / totalOutcome
+    }
+
+    market.totalYesAmount += prediction === 'yes' ? netAmount : 0
+    market.totalNoAmount += prediction === 'no' ? netAmount : 0
+    market.volume24h += amount
+    market.totalVolume = (market.totalVolume || 0) + amount
+    market.platformFeesCollected += platformFee
+
+    const saved = await saveMarkets(markets)
+
+    if (saved) {
+      await updateUserBalance(walletAddress, -amount, 'deposit')
+
+      const stats = await loadPlatformStats()
+      stats.totalVolume += amount
+      stats.totalFees += platformFee
+      stats.last24hVolume += amount
+      stats.last24hFees += platformFee
+      stats.totalPoolMoney += netAmount
+
+      const allBets = markets.flatMap(m => m.bets)
+      const uniqueUsers = new Set(allBets.map(b => b.walletAddress))
+      stats.totalUsers = uniqueUsers.size
+
+      await savePlatformStats(stats)
+
+      return { success: true }
+    } else {
+      return { success: false, error: 'Failed to save bet' }
+    }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+// Resolve multi-outcome market
+export const resolveMultiOutcomeMarket = async (
+  marketId: string,
+  winningOutcomeId: string,
+  adminWallet: string
+): Promise<{ success: boolean; winners: { walletAddress: string; payout: number }[]; error?: string }> => {
+  if (adminWallet !== ADMIN_WALLET_ADDRESS) {
+    return { success: false, winners: [], error: 'Unauthorized: Only admin can resolve markets' }
+  }
+
+  try {
+    const markets = await loadMarkets()
+    const marketIndex = markets.findIndex(m => m.id === marketId)
+
+    if (marketIndex === -1) {
+      return { success: false, winners: [], error: 'Market not found' }
+    }
+
+    const market = markets[marketIndex]
+
+    if (market.status === 'resolved') {
+      return { success: false, winners: [], error: 'Market already resolved' }
+    }
+
+    if (market.marketType !== 'multi-outcome' || !market.outcomes) {
+      return { success: false, winners: [], error: 'This is not a multi-outcome market' }
+    }
+
+    const winningOutcome = market.outcomes.find(o => o.id === winningOutcomeId)
+    if (!winningOutcome) {
+      return { success: false, winners: [], error: 'Winning outcome not found' }
+    }
+
+    market.status = 'resolved'
+    market.resolvedAt = Date.now()
+    market.winningOutcomeId = winningOutcomeId
+    winningOutcome.isWinner = true
+
+    const totalPool = market.bets
+      .filter(b => b.outcomeId === winningOutcomeId)
+      .reduce((sum, b) => sum + b.amount, 0)
+    
+    const winningBets = market.bets.filter(
+      b => b.outcomeId === winningOutcomeId && b.prediction === 'yes'
+    )
+
+    const winners: { walletAddress: string; payout: number }[] = []
+    let totalSettlementFees = 0
+
+    if (winningBets.length > 0 && winningOutcome.totalYesAmount > 0) {
+      const allOutcomePool = market.outcomes.reduce((sum, o) => 
+        sum + o.totalYesAmount + o.totalNoAmount, 0
+      )
+
+      const betsByWallet = winningBets.reduce((acc, bet) => {
+        if (!acc[bet.walletAddress]) acc[bet.walletAddress] = 0
+        acc[bet.walletAddress] += bet.amount
+        return acc
+      }, {} as Record<string, number>)
+
+      for (const [walletAddress, amount] of Object.entries(betsByWallet)) {
+        const share = amount / winningOutcome.totalYesAmount
+        const grossPayout = allOutcomePool * share
+        const settlementFee = grossPayout * (SETTLEMENT_FEE_PERCENTAGE / 100)
+        const netPayout = grossPayout - settlementFee
+
+        totalSettlementFees += settlementFee
+        winners.push({ walletAddress, payout: netPayout })
+
+        await updateUserBalance(walletAddress, netPayout, 'winning')
+      }
+    }
+
+    const saved = await saveMarkets(markets)
+
+    if (saved) {
+      const stats = await loadPlatformStats()
+      stats.totalFees += totalSettlementFees
+      stats.activeMarkets = markets.filter(m => m.status === 'active').length
+      await savePlatformStats(stats)
+
+      return { success: true, winners }
+    } else {
+      return { success: false, winners: [], error: 'Failed to save market resolution' }
+    }
+  } catch (err) {
+    return { success: false, winners: [], error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
 
@@ -377,15 +954,14 @@ export const placeBet = async (
     }
 
     market.volume24h += amount
+    market.totalVolume = (market.totalVolume || 0) + amount
     market.platformFeesCollected += platformFee
 
     const saved = await saveMarkets(markets)
 
     if (saved) {
-      // Update user balance
       await updateUserBalance(walletAddress, -amount, 'deposit')
 
-      // Update platform stats
       const stats = await loadPlatformStats()
       stats.totalVolume += amount
       stats.totalFees += platformFee
@@ -393,7 +969,6 @@ export const placeBet = async (
       stats.last24hFees += platformFee
       stats.totalPoolMoney += netAmount
       
-      // Count unique users
       const allBets = markets.flatMap(m => m.bets)
       const uniqueUsers = new Set(allBets.map(b => b.walletAddress))
       stats.totalUsers = uniqueUsers.size

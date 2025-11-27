@@ -30,6 +30,8 @@ export interface Task {
 export type MarketStatus = 'active' | 'closed' | 'resolved';
 export type PredictionOption = 'yes' | 'no';
 export type MarketCategory = 'crypto' | 'politics' | 'sports' | 'entertainment' | 'technology' | 'economy' | 'other';
+export type MarketType = 'simple' | 'multi-outcome';
+export type TimingType = 'fixed' | 'flexible' | 'tbd';
 
 export interface Bet {
   id: string;
@@ -39,6 +41,43 @@ export interface Bet {
   timestamp: number;
   transactionSignature: string;
   platformFee: number; // Platform fee collected
+  outcomeId?: string; // For multi-outcome markets, links bet to specific outcome
+}
+
+export interface MarketOutcome {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  totalYesAmount: number;
+  totalNoAmount: number;
+  yesPrice: number;
+  noPrice: number;
+  uniqueYesBettors: string[];
+  uniqueNoBettors: string[];
+  isWinner?: boolean;
+}
+
+export interface MarketNews {
+  id: string;
+  content: string;
+  link?: string;
+  createdAt: number;
+  createdBy: string;
+}
+
+export interface MarketComment {
+  id: string;
+  walletAddress: string;
+  content: string;
+  timestamp: number;
+  likes: string[];
+  parentId?: string;
+}
+
+export interface MarketRule {
+  id: string;
+  content: string;
+  order: number;
 }
 
 export interface Market {
@@ -47,21 +86,32 @@ export interface Market {
   description: string;
   imageUrl: string;
   category: MarketCategory;
-  initialYesPrice: number; // Starting probability for Yes (0-1, e.g., 0.5 = 50%)
+  marketType: MarketType;
+  initialYesPrice: number;
   createdAt: number;
-  closesAt: number; // When market stops accepting bets
-  resolveTime: number; // When admin will resolve the market
+  closesAt: number | null;
+  resolveTime: number | null;
+  timingType: TimingType;
+  timingNote?: string;
   resolvedAt: number | null;
   status: MarketStatus;
   outcome: PredictionOption | null;
   totalYesAmount: number;
   totalNoAmount: number;
   bets: Bet[];
-  createdBy: string; // admin wallet address
+  createdBy: string;
   volume24h: number;
+  totalVolume: number;
   platformFeesCollected: number;
-  uniqueYesBettors: string[]; // Array of wallet addresses who bet Yes
-  uniqueNoBettors: string[]; // Array of wallet addresses who bet No
+  uniqueYesBettors: string[];
+  uniqueNoBettors: string[];
+  outcomes?: MarketOutcome[];
+  winningOutcomeId?: string;
+  news: MarketNews[];
+  comments: MarketComment[];
+  rules: MarketRule[];
+  lastEditedAt?: number;
+  lastEditedBy?: string;
 }
 
 export interface MarketData {
