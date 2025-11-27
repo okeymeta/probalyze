@@ -69,6 +69,9 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       clientPort: 5000,
     },
+    watch: {
+      ignored: ['**/.cache/**', '**/node_modules/**', '**/dist/**']
+    },
   },
   optimizeDeps: {
     force: true,

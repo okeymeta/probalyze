@@ -292,7 +292,7 @@ export const App: React.FC = () => {
         showModal('Market resolved successfully! Payouts have been calculated.', 'success');
     };
 
-    const handleMarketClickFromPortfolio = (marketId: number) => {
+    const handleMarketClickFromPortfolio = (marketId: string) => {
         // Find the market and navigate to its detail view
         loadMarkets().then(markets => {
             const market = markets.find(m => m.id === marketId);
