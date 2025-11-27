@@ -66,36 +66,38 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
 
       // Extract user's bets from all markets
       const userBets: PortfolioBet[] = [];
-      
+
       for (const market of markets) {
         const marketBets = market.bets.filter(bet => bet.walletAddress === walletAddress);
-        
+
         for (const bet of marketBets) {
           const totalPool = market.totalYesAmount + market.totalNoAmount;
           const winningPool = bet.prediction === 'yes' ? market.totalYesAmount : market.totalNoAmount;
           const potentialPayout = winningPool > 0 ? (bet.amount / winningPool) * totalPool : bet.amount;
-          
+
           let actualPayout: number | null = null;
           let isSettled = market.status === 'resolved';
-          
+
+
           if (isSettled) {
             let isWinner = false;
-            
+
             // Handle multi-outcome markets
             if (market.marketType === 'multi-outcome' && market.outcomes) {
               const winningOutcome = (market as any).resolvedOutcomeId;
               if (bet.outcomeId && bet.outcomeId === winningOutcome && bet.prediction === 'yes') {
                 isWinner = true;
               }
-            } 
+            }
             // Handle binary markets
             else if (market.outcome) {
               if (bet.prediction === market.outcome) {
                 isWinner = true;
               }
             }
-            
+
             if (isWinner) {
+
               // Winner - calculate payout
               actualPayout = potentialPayout * 0.97; // After 3% settlement fee
             } else {
@@ -104,16 +106,16 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
             }
           }
 
-          const outcomeName = bet.outcomeId && market.outcomes 
-            ? market.outcomes.find(o => o.id === bet.outcomeId)?.name 
+          const outcomeName = bet.outcomeId && market.outcomes
+            ? market.outcomes.find(o => o.id === bet.outcomeId)?.name
             : undefined;
-          
+
           userBets.push({
             id: bet.id,
             marketId: market.id,
             amount: bet.amount,
             prediction: bet.prediction,
-            priceAtBet: bet.prediction === 'yes' 
+            priceAtBet: bet.prediction === 'yes'
               ? market.totalYesAmount / (market.totalYesAmount + market.totalNoAmount || 1)
               : market.totalNoAmount / (market.totalYesAmount + market.totalNoAmount || 1),
             potentialPayout,
@@ -230,7 +232,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
 
   const { portfolio, bets, user } = data;
   const isProfitable = portfolio.profitLoss >= 0;
-  const winRate = portfolio.settledBets > 0 
+  const winRate = portfolio.settledBets > 0
     ? ((bets.filter(b => b.isSettled && (b.actualPayout || 0) > 0).length / portfolio.settledBets) * 100).toFixed(1)
     : '0';
 
@@ -334,11 +336,10 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    filter === f
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === f
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                    }`}
                 >
                   {f.charAt(0).toUpperCase() + f.slice(1)}
                   {f === 'active' && portfolio.activeBets > 0 && (
@@ -357,7 +358,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
             <BarChart3 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-400 mb-2">No {filter !== 'all' ? filter : ''} bets found</h3>
             <p className="text-gray-500">
-              {filter === 'all' 
+              {filter === 'all'
                 ? "Start trading on prediction markets to build your portfolio!"
                 : `You don't have any ${filter} bets at the moment.`
               }
@@ -380,10 +381,10 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                 {filteredBets.map((bet) => {
                   const isWin = bet.isSettled && (bet.actualPayout || 0) > 0;
                   const isLoss = bet.isSettled && bet.actualPayout === 0;
-                  
+
                   return (
-                    <tr 
-                      key={bet.id} 
+                    <tr
+                      key={bet.id}
                       className="hover:bg-gray-800/30 transition-colors cursor-pointer"
                       onClick={() => onMarketClick?.(bet.marketId)}
                     >
@@ -400,11 +401,10 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
-                          bet.prediction === 'yes' 
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                        }`}>
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${bet.prediction === 'yes'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          }`}>
                           {bet.prediction === 'yes' ? (
                             <ArrowUpRight className="w-3 h-3" />
                           ) : (

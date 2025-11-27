@@ -81,7 +81,7 @@ export const App: React.FC = () => {
             }
         }
         setAvailableWallets(wallets);
-        
+
         if (wallets.length === 1) {
             setProvider(wallets[0].provider);
         }
@@ -89,7 +89,7 @@ export const App: React.FC = () => {
         // Check for previously connected wallet and attempt reconnection
         const savedWalletName = localStorage.getItem(WALLET_NAME_STORAGE_KEY);
         const savedWalletAddress = localStorage.getItem(WALLET_STORAGE_KEY);
-        
+
         if (savedWalletName && savedWalletAddress && wallets.length > 0) {
             const savedWallet = wallets.find(w => w.name === savedWalletName);
             if (savedWallet) {
@@ -110,7 +110,7 @@ export const App: React.FC = () => {
     const attemptAutoReconnect = async (walletProvider: SolanaProvider, expectedAddress: string) => {
         try {
             const { publicKey: userPublicKey } = await walletProvider.connect({ onlyIfTrusted: true });
-            
+
             if (userPublicKey.toBase58() === expectedAddress) {
                 setPublicKey(userPublicKey);
             } else {
@@ -125,7 +125,7 @@ export const App: React.FC = () => {
             setIsAutoConnecting(false);
         }
     };
-    
+
     // Auto-refund system - runs every 10 minutes
     useEffect(() => {
         const checkRefunds = async () => {
@@ -145,7 +145,7 @@ export const App: React.FC = () => {
         const interval = setInterval(checkRefunds, 10 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
-    
+
     const loadPreviewMarkets = async () => {
         try {
             const markets = await loadMarkets();
@@ -204,13 +204,13 @@ export const App: React.FC = () => {
         try {
             const { publicKey: userPublicKey } = await provider.connect({ onlyIfTrusted: false });
             setPublicKey(userPublicKey);
-            
+
             const connectedWalletName = availableWallets.find(w => w.provider === provider)?.name;
             if (connectedWalletName) {
                 localStorage.setItem(WALLET_STORAGE_KEY, userPublicKey.toBase58());
                 localStorage.setItem(WALLET_NAME_STORAGE_KEY, connectedWalletName);
             }
-            
+
             showModal('Wallet connected successfully!', 'success');
         } catch (error) {
             console.error('Wallet connection failed:', error);
@@ -237,10 +237,10 @@ export const App: React.FC = () => {
                 setShowAdminPanel(false);
                 setSelectedMarketForViewing(null);
                 setCurrentPage('markets');
-                
+
                 localStorage.removeItem(WALLET_STORAGE_KEY);
                 localStorage.removeItem(WALLET_NAME_STORAGE_KEY);
-                
+
                 showModal('Wallet disconnected', 'info');
             } catch (err) {
                 console.error('Disconnect error:', err);
@@ -347,7 +347,7 @@ export const App: React.FC = () => {
                         <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-10">
                             The most advanced prediction market platform. Trade on real-world events with transparent settlements and real-time charts.
                         </p>
-                        
+
                         {/* Wallet Connection */}
                         <div className="flex flex-col items-center gap-4">
                             {availableWallets.length > 1 && (
@@ -356,11 +356,10 @@ export const App: React.FC = () => {
                                         <button
                                             key={wallet.name}
                                             onClick={() => handleSelectWallet(wallet)}
-                                            className={`px-5 py-2 rounded-lg border font-bold text-sm transition-all ${
-                                                provider === wallet.provider 
-                                                    ? 'bg-purple-600 text-white border-purple-500 shadow-lg shadow-purple-500/30' 
+                                            className={`px-5 py-2 rounded-lg border font-bold text-sm transition-all ${provider === wallet.provider
+                                                    ? 'bg-purple-600 text-white border-purple-500 shadow-lg shadow-purple-500/30'
                                                     : 'bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:border-purple-500/50'
-                                            }`}
+                                                }`}
                                         >
                                             {wallet.name}
                                         </button>
@@ -400,16 +399,16 @@ export const App: React.FC = () => {
                                 {previewMarkets.map(market => {
                                     const totalVolume = market.totalYesAmount + market.totalNoAmount;
                                     const yesPercentage = totalVolume > 0 ? (market.totalYesAmount / totalVolume) * 100 : market.initialYesPrice * 100;
-                                    
+
                                     return (
-                                        <div 
-                                            key={market.id} 
+                                        <div
+                                            key={market.id}
                                             className="glass-card rounded-xl p-6 hover:border-purple-500/30 transition-all cursor-pointer market-card"
                                             onClick={initiateConnection}
                                         >
                                             {market.imageUrl && (
-                                                <img 
-                                                    src={market.imageUrl} 
+                                                <img
+                                                    src={market.imageUrl}
                                                     alt={market.title}
                                                     className="w-full h-32 object-cover rounded-lg mb-4"
                                                 />
@@ -426,7 +425,7 @@ export const App: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden mb-4">
-                                                <div 
+                                                <div
                                                     className="bg-gradient-to-r from-green-500 to-green-400 h-full transition-all"
                                                     style={{ width: `${yesPercentage}%` }}
                                                 />
@@ -494,8 +493,8 @@ export const App: React.FC = () => {
         // Portfolio Page
         if (currentPage === 'portfolio') {
             return (
-                <PortfolioPage 
-                    walletAddress={publicKey.toBase58()} 
+                <PortfolioPage
+                    walletAddress={publicKey.toBase58()}
                     onMarketClick={handleMarketClickFromPortfolio}
                 />
             );
@@ -519,11 +518,10 @@ export const App: React.FC = () => {
                                 setShowAdminDashboard(!showAdminDashboard);
                                 setShowAdminPanel(false);
                             }}
-                            className={`px-6 py-3 rounded-lg font-bold transition-all ${
-                                showAdminDashboard
+                            className={`px-6 py-3 rounded-lg font-bold transition-all ${showAdminDashboard
                                     ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
                                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-                            }`}
+                                }`}
                         >
                             📊 Dashboard
                         </button>
@@ -532,11 +530,10 @@ export const App: React.FC = () => {
                                 setShowAdminPanel(!showAdminPanel);
                                 setShowAdminDashboard(false);
                             }}
-                            className={`px-6 py-3 rounded-lg font-bold transition-all ${
-                                showAdminPanel
+                            className={`px-6 py-3 rounded-lg font-bold transition-all ${showAdminPanel
                                     ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
                                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-                            }`}
+                                }`}
                         >
                             ➕ Create Market
                         </button>
@@ -550,8 +547,8 @@ export const App: React.FC = () => {
                         setShowAdminDashboard(false);
                     }} />
                 ) : isAdmin && showAdminPanel ? (
-                    <AdminPanel 
-                        adminWallet={publicKey.toBase58()} 
+                    <AdminPanel
+                        adminWallet={publicKey.toBase58()}
                         onMarketCreated={handleMarketCreated}
                     />
                 ) : (
@@ -580,9 +577,9 @@ export const App: React.FC = () => {
         <div className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
             {modalContent && <Modal message={modalContent.message} type={modalContent.type} onClose={hideModal} />}
             {showTermsModal && <TermsModal onAccept={handleAcceptTerms} onDecline={handleDeclineTerms} />}
-            <Header 
-                connectedWallet={publicKey?.toBase58()} 
-                isAdmin={isAdmin} 
+            <Header
+                connectedWallet={publicKey?.toBase58()}
+                isAdmin={isAdmin}
                 onDisconnect={handleDisconnect}
                 currentPage={currentPage}
                 onNavigate={handleNavigate}
