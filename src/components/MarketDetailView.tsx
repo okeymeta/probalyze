@@ -9,8 +9,11 @@ import {
   ResponsiveContainer, ComposedChart, Bar, Line 
 } from 'recharts';
 import { Market, Bet } from '../types';
-import { generateChartData, getUserBetsForMarket, calculatePriceChange } from '../lib/marketManager';
+import { generateChartData, getUserBetsForMarket, calculatePriceChange, loadMarkets } from '../lib/marketManager';
 import { SETTLEMENT_FEE_PERCENTAGE, PLATFORM_FEE_PERCENTAGE } from '../constants';
+import { CommentSection } from './CommentSection';
+import { NewsSection } from './NewsSection';
+import { RulesSection } from './RulesSection';
 
 interface MarketDetailViewProps {
   market: Market;
@@ -35,6 +38,7 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
   const [chartType, setChartType] = useState<ChartType>('area');
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('ALL');
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const totalPool = market.totalYesAmount + market.totalNoAmount;
   const yesPercentage = totalPool > 0 ? (market.totalYesAmount / totalPool) * 100 : market.initialYesPrice * 100;
@@ -668,6 +672,17 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* News, Rules, Comments Sections */}
+      <div className="mt-8 space-y-6">
+        <NewsSection market={market} />
+        <RulesSection market={market} />
+        <CommentSection 
+          market={market} 
+          userWallet={userWallet} 
+          onCommentAdded={() => setRefreshKey(prev => prev + 1)}
+        />
       </div>
     </div>
   );

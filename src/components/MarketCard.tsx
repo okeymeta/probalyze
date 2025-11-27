@@ -103,6 +103,14 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   };
 
   const getOutcomeBadge = () => {
+    if (market.marketType === 'multi-outcome') {
+      return (
+        <div className="bg-purple-500 px-3 py-1.5 rounded-lg text-white text-xs font-bold flex items-center gap-1.5">
+          <span>🗳️</span>
+          Multi-Outcome
+        </div>
+      );
+    }
     if (market.status === 'resolved' && market.outcome) {
       const outcomeText = market.outcome === 'yes' ? 'YES' : 'NO';
       const bgColor = market.outcome === 'yes' ? 'bg-green-500' : 'bg-red-500';
