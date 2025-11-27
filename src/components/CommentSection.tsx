@@ -100,7 +100,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const CommentItem: React.FC<{ comment: MarketComment; isReply?: boolean }> = ({ comment, isReply = false }) => {
     const isOwner = userWallet === comment.walletAddress;
     const isAdmin = userWallet === ADMIN_WALLET_ADDRESS;
-    const hasLiked = userWallet && comment.likes.includes(userWallet);
+    const hasLiked = userWallet && (comment.likes || []).includes(userWallet);
     const replies = getReplies(comment.id);
 
     return (
@@ -137,7 +137,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
               }`}
             >
               <Heart className={`w-3 h-3 ${hasLiked ? 'fill-current' : ''}`} />
-              {comment.likes.length > 0 && comment.likes.length}
+              {(comment.likes || []).length > 0 && (comment.likes || []).length}
             </button>
             
             {!isReply && userWallet && (
