@@ -38,6 +38,7 @@ export const App: React.FC = () => {
     const [isConnecting, setIsConnecting] = useState(false);
     const [selectedMarketForBetting, setSelectedMarketForBetting] = useState<Market | null>(null);
     const [selectedOutcomeId, setSelectedOutcomeId] = useState<string | undefined>(undefined);
+    const [initialPrediction, setInitialPrediction] = useState<'yes' | 'no'>('yes');
     const [selectedMarketForResolving, setSelectedMarketForResolving] = useState<Market | null>(null);
     const [selectedMarketForViewing, setSelectedMarketForViewing] = useState<Market | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -254,7 +255,7 @@ export const App: React.FC = () => {
         setShowAdminDashboard(false);
     };
 
-    const handleBetClick = (market: Market | (Market & { selectedOutcomeId?: string }), outcomeId?: string) => {
+    const handleBetClick = (market: Market | (Market & { selectedOutcomeId?: string }), outcomeId?: string, prediction?: 'yes' | 'no') => {
         if (!publicKey) {
             showModal('Please connect your wallet first', 'error');
             return;
@@ -262,6 +263,7 @@ export const App: React.FC = () => {
         const extractedOutcomeId = 'selectedOutcomeId' in market ? market.selectedOutcomeId : outcomeId;
         setSelectedMarketForBetting(market);
         setSelectedOutcomeId(extractedOutcomeId);
+        setInitialPrediction(prediction || 'yes');
     };
 
     const handleResolveClick = (market: Market) => {
@@ -599,9 +601,11 @@ export const App: React.FC = () => {
                     onClose={() => {
                         setSelectedMarketForBetting(null);
                         setSelectedOutcomeId(undefined);
+                        setInitialPrediction('yes');
                     }}
                     onBetPlaced={handleBetPlaced}
                     outcomeId={selectedOutcomeId}
+                    initialPrediction={initialPrediction}
                 />
             )}
 

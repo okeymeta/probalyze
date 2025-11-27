@@ -41,7 +41,7 @@ interface PortfolioData {
 
 interface PortfolioPageProps {
   walletAddress: string;
-  onMarketClick?: (marketId: number) => void;
+  onMarketClick?: (marketId: string) => void;
 }
 
 export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onMarketClick }) => {
@@ -83,7 +83,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
             
             // Handle multi-outcome markets
             if (market.marketType === 'multi-outcome' && market.outcomes) {
-              const winningOutcome = market.resolvedOutcomeId;
+              const winningOutcome = (market as any).resolvedOutcomeId;
               if (bet.outcomeId && bet.outcomeId === winningOutcome && bet.prediction === 'yes') {
                 isWinner = true;
               }
@@ -385,7 +385,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                     <tr 
                       key={bet.id} 
                       className="hover:bg-gray-800/30 transition-colors cursor-pointer"
-                      onClick={() => onMarketClick?.(parseInt(bet.marketId.split('-')[1]) || 0)}
+                      onClick={() => onMarketClick?.(bet.marketId)}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">

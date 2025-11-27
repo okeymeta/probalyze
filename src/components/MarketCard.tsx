@@ -299,7 +299,8 @@ export const MarketCard: React.FC<MarketCardProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              (onBetClick as any)(market, outcome.id, 'yes');
+                              const marketWithOutcome = { ...market, selectedOutcomeId: outcome.id };
+                              (onBetClick as any)(marketWithOutcome, outcome.id, 'yes');
                             }}
                             className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-xs font-bold py-2 rounded transition-all"
                           >
@@ -308,7 +309,8 @@ export const MarketCard: React.FC<MarketCardProps> = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              (onBetClick as any)(market, outcome.id, 'no');
+                              const marketWithOutcome = { ...market, selectedOutcomeId: outcome.id };
+                              (onBetClick as any)(marketWithOutcome, outcome.id, 'no');
                             }}
                             className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-xs font-bold py-2 rounded transition-all"
                           >

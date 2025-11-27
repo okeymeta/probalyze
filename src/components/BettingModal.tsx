@@ -13,6 +13,7 @@ interface BettingModalProps {
   onClose: () => void;
   onBetPlaced: () => void;
   outcomeId?: string; // For multi-outcome markets
+  initialPrediction?: 'yes' | 'no'; // Pre-selected prediction from market card
 }
 
 export const BettingModal: React.FC<BettingModalProps> = ({ 
@@ -21,9 +22,10 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   userWallet, 
   onClose, 
   onBetPlaced,
-  outcomeId
+  outcomeId,
+  initialPrediction
 }) => {
-  const [prediction, setPrediction] = useState<PredictionOption>('yes');
+  const [prediction, setPrediction] = useState<PredictionOption>(initialPrediction || 'yes');
   const [amount, setAmount] = useState<string>('');
   const [isPlacing, setIsPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
