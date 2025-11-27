@@ -28,7 +28,7 @@ type ChartType = 'area' | 'candlestick';
 type TimeFrame = '1H' | '4H' | '1D' | 'ALL';
 
 export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
-  market,
+  market: initialMarket,
   userWallet,
   onBack,
   onBetClick,
@@ -39,6 +39,21 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('ALL');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [market, setMarket] = useState<Market>(initialMarket);
+
+  // Reload market data in real-time when refreshKey changes
+  useEffect(() => {
+    const reloadMarket = async () => {
+      const markets = await loadMarkets();
+      const updatedMarket = markets.find(m => m.id === initialMarket.id);
+      if (updatedMarket) {
+        setMarket(updatedMarket);
+      }
+    };
+    if (refreshKey > 0) {
+      reloadMarket();
+    }
+  }, [refreshKey, initialMarket.id]);
 
   const totalPool = market.totalYesAmount + market.totalNoAmount;
   const yesPercentage = totalPool > 0 ? (market.totalYesAmount / totalPool) * 100 : market.initialYesPrice * 100;
