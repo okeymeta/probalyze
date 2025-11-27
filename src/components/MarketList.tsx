@@ -18,10 +18,16 @@ const CATEGORIES: { value: MarketCategory | 'all'; label: string; icon: string }
   { value: 'all', label: 'All', icon: '🌐' },
   { value: 'crypto', label: 'Crypto', icon: '₿' },
   { value: 'politics', label: 'Politics', icon: '🏛️' },
+  { value: 'elections', label: 'Elections', icon: '🗳️' },
   { value: 'sports', label: 'Sports', icon: '⚽' },
   { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
   { value: 'technology', label: 'Technology', icon: '💻' },
   { value: 'economy', label: 'Economy', icon: '📈' },
+  { value: 'finance', label: 'Finance', icon: '💰' },
+  { value: 'weather', label: 'Weather', icon: '🌤️' },
+  { value: 'science', label: 'Science', icon: '🔬' },
+  { value: 'esports', label: 'Esports', icon: '🎮' },
+  { value: 'AI', label: 'AI', icon: '🤖' },
   { value: 'other', label: 'Other', icon: '📌' },
 ];
 
