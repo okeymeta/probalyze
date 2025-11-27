@@ -1,6 +1,7 @@
 modules = ["nodejs-20", "web", "bun"]
 [agent]
 expertMode = true
+integrations = ["javascript_gemini:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -8,10 +9,6 @@ channel = "stable-25_05"
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 33479
-externalPort = 3000
 
 [workflows]
 runButton = "Project"
