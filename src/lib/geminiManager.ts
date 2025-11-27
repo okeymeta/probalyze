@@ -1,7 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Get API key from environment (Replit secrets or .env)
-const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+// Get API key from Vite's defined environment variable
+const apiKey = (import.meta.env.VITE_GOOGLE_API_KEY as string) || '';
+
+// Log for debugging
+if (typeof window !== 'undefined') {
+  console.log('🔍 Gemini API Key Status:', apiKey ? '✅ Loaded' : '❌ Not found');
+}
 
 // Lazy initialization to avoid errors when key is missing
 let aiClient: GoogleGenAI | null = null;

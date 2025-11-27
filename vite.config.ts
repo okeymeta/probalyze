@@ -62,35 +62,39 @@ const logErrorsPlugin = () => ({
 });
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "0.0.0.0",
-    port: 5000,
-    allowedHosts: true,
-    hmr: {
-      clientPort: 5000,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, '.', '');
+  const googleApiKey = process.env.GOOGLE_API_KEY || env.VITE_GOOGLE_API_KEY || env.GOOGLE_API_KEY || '';
+  
+  return {
+    server: {
+      host: "0.0.0.0",
+      port: 5000,
+      allowedHosts: true,
+      hmr: {
+        clientPort: 5000,
+      },
+      watch: {
+        ignored: ['**/.cache/**', '**/node_modules/**', '**/dist/**']
+      },
     },
-    watch: {
-      ignored: ['**/.cache/**', '**/node_modules/**', '**/dist/**']
+    optimizeDeps: {
+      force: true,
+      include: ['react', 'react-dom', 'react/jsx-runtime'],
     },
-  },
-  optimizeDeps: {
-    force: true,
-    include: ['react', 'react-dom', 'react/jsx-runtime'],
-  },
-  plugins: [
-    react(),
-    logErrorsPlugin(),
-    mode === 'development' && componentTaggerPlugin(),
-  ].filter(Boolean),
-  define: {
-    'process.env.API_KEY': JSON.stringify(loadEnv(mode, '.', '').GEMINI_API_KEY),
-    'process.env.GEMINI_API_KEY': JSON.stringify(loadEnv(mode, '.', '').GEMINI_API_KEY)
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, '.'),
+    plugins: [
+      react(),
+      logErrorsPlugin(),
+      mode === 'development' && componentTaggerPlugin(),
+    ].filter(Boolean),
+    define: {
+      'import.meta.env.VITE_GOOGLE_API_KEY': JSON.stringify(googleApiKey)
+    },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '.'),
+      }
     }
-  }
-}));
+  };
+});
 // Orchids restart: 1764069065810

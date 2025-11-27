@@ -11,7 +11,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 36973
+localPort = 33157
 externalPort = 3000
 
 [workflows]
@@ -42,3 +42,8 @@ outputType = "webview"
 deploymentTarget = "static"
 build = ["bun", "run", "build"]
 publicDir = "dist"
+
+[userenv]
+
+[userenv.shared]
+VITE_GOOGLE_API_KEY = "${GOOGLE_API_KEY}"
