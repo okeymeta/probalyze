@@ -355,34 +355,8 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
               )}
             </div>
 
-            {/* Multi-Outcome Display */}
-            {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 ? (
-              <div className="space-y-3">
-                {market.outcomes.map((outcome) => {
-                  const outcomeTotal = outcome.totalYesAmount + outcome.totalNoAmount;
-                  const outcomeTotalPool = market.totalYesAmount + market.totalNoAmount;
-                  const outcomePercentage = outcomeTotalPool > 0 ? (outcomeTotal / outcomeTotalPool) * 100 : 0;
-                  
-                  return (
-                    <div key={outcome.id} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-lg font-bold text-white">{outcome.name}</h3>
-                        <span className="text-2xl font-bold text-purple-400">{outcomePercentage.toFixed(0)}%</span>
-                      </div>
-                      <div className="flex gap-3">
-                        <button className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 py-3 rounded-lg font-bold transition-all">
-                          Yes
-                        </button>
-                        <button className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 py-3 rounded-lg font-bold transition-all">
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Binary Market Price Display */
+            {/* Binary Market Price Display */}
+            {(!market.marketType || market.marketType === 'simple') && (
               <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
                 <div>
                   <div className="flex items-center gap-2 mb-1">

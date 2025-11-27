@@ -263,6 +263,8 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   };
 
   const topTraders = getTopTraders();
+  const selectedOutcome = outcomeId ? market.outcomes?.find(o => o.id === outcomeId) : null;
+  const isMultiOutcome = market.marketType === 'multi-outcome' && outcomeId;
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto" onClick={onClose}>
@@ -273,6 +275,52 @@ export const BettingModal: React.FC<BettingModalProps> = ({
             <p className="text-gray-400 text-xs sm:text-sm line-clamp-2">{market.title}</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-white text-xl sm:text-2xl shrink-0 p-1">&times;</button>
+        </div>
+
+        {/* Trading Details - Personalized Info */}
+        <div className={`rounded-lg p-4 mb-4 sm:mb-6 border-2 ${
+          isMultiOutcome 
+            ? 'bg-purple-500/10 border-purple-500' 
+            : 'bg-blue-500/10 border-blue-500'
+        }`}>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-300 text-sm">Market Type</span>
+              <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                isMultiOutcome
+                  ? 'bg-purple-500/20 text-purple-300'
+                  : 'bg-blue-500/20 text-blue-300'
+              }`}>
+                {isMultiOutcome ? '🗳️ Multi-Outcome' : '📊 Binary'}
+              </span>
+            </div>
+            {isMultiOutcome && selectedOutcome && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300 text-sm">Trading On</span>
+                <span className="text-white font-bold text-sm">{selectedOutcome.name}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-300 text-sm">Your Prediction</span>
+              <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                prediction === 'yes'
+                  ? 'bg-green-500/20 text-green-300'
+                  : 'bg-red-500/20 text-red-300'
+              }`}>
+                {prediction === 'yes' ? '👍 YES' : '👎 NO'}
+              </span>
+            </div>
+            {amount && parseFloat(amount) >= MINIMUM_BET_AMOUNT && (
+              <div className="border-t border-gray-600 pt-2 mt-2 flex items-center justify-between">
+                <span className="text-gray-300 text-sm">Potential Profit</span>
+                <span className={`text-base font-bold ${
+                  potentialReturn > 0 ? 'text-green-400' : 'text-gray-400'
+                }`}>
+                  {potentialReturn > 0 ? '+' : ''}{potentialReturn.toFixed(4)} SOL
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Toggle between Manual and Copy Trade */}
