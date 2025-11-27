@@ -191,8 +191,20 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         )}
       </h3>
 
+      {/* Comments Display First */}
+      <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
+        {topLevelComments.length > 0 ? (
+          topLevelComments.map(comment => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))
+        ) : (
+          <p className="text-gray-500 text-sm text-center py-4">No comments yet. Be the first to comment!</p>
+        )}
+      </div>
+
+      {/* Input Section at Bottom */}
       {userWallet ? (
-        <form onSubmit={handleSubmitComment} className="mb-4">
+        <form onSubmit={handleSubmitComment}>
           <div className="flex gap-2">
             <input
               type="text"
@@ -219,20 +231,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
           )}
         </form>
       ) : (
-        <div className="bg-gray-800/50 rounded-lg p-3 mb-4 text-center">
+        <div className="bg-gray-800/50 rounded-lg p-3 text-center">
           <p className="text-gray-400 text-sm">Connect wallet to comment</p>
         </div>
       )}
-
-      <div className="space-y-3 max-h-96 overflow-y-auto">
-        {topLevelComments.length > 0 ? (
-          topLevelComments.map(comment => (
-            <CommentItem key={comment.id} comment={comment} />
-          ))
-        ) : (
-          <p className="text-gray-500 text-sm text-center py-4">No comments yet. Be the first to comment!</p>
-        )}
-      </div>
     </div>
   );
 };
