@@ -6,6 +6,26 @@ Probalyze is a decentralized prediction market platform built on Solana, allowin
 
 The application features real-time market charts, portfolio tracking, leaderboards, and comprehensive admin controls for market creation and resolution. All market data and user balances are stored in S3-compatible storage (Supabase), with optional Turso database integration via Drizzle ORM.
 
+## Recent Updates (November 27, 2025)
+
+**Multi-Outcome Markets & UI Enhancements:**
+- Implemented multi-outcome market display with individual candidate cards showing YES/NO buttons
+- Each candidate displays its percentage of the total pool
+- Market cards now show candidates in a grid layout (similar to election markets with candidates like "J.D. Vance", "Gavin Newsom")
+- Fixed date/time display: shows custom timing notes when admin doesn't set specific date (supports TBD, flexible, and fixed timing types)
+- Real-time comment updates with likes/deletes without page refresh
+- Comment system fully functional with instant UI updates
+
+**Expanded Market Categories:**
+- Added 13 categories: crypto, politics, elections, sports, entertainment, technology, economy, finance, weather, science, esports, blockchain, other
+- Categories now available in AdminPanel for market creation
+- Category badges display on market cards for quick identification
+
+**Bug Fixes:**
+- Fixed undefined likes array error in comment system
+- Resolved LSP type errors in MarketDetailView
+- Binary market display preserved for backward compatibility
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -22,11 +42,16 @@ Preferred communication style: Simple, everyday language.
 - Glassmorphism effects and gradient overlays
 - shadcn/ui component library for consistent UI primitives
 
-**State Management**: React hooks with local component state. No global state management library is used - data is fetched on-demand and passed through props.
+**State Management**: React hooks with local component state plus useEffect for real-time refreshing. Data is fetched on-demand and passed through props. Market detail views automatically reload data when comments/likes are updated.
 
 **Routing**: Single-page application with manual page state management (no React Router). Navigation between Markets, Portfolio, and Leaderboard pages is handled via a `currentPage` state variable.
 
 **Chart Visualization**: Recharts library for rendering market price charts with area and candlestick views, including volume indicators and real-time price updates.
+
+**Multi-Outcome Markets**: MarketCard and MarketDetailView components now support:
+- Displaying multiple candidates/outcomes in a grid
+- Each outcome shows name, percentage, and YES/NO buttons
+- Full backward compatibility with binary (simple) markets
 
 ### Blockchain Integration
 
@@ -48,7 +73,7 @@ Preferred communication style: Simple, everyday language.
 **Primary Storage**: S3-compatible storage (Supabase S3) for JSON-based data persistence.
 
 **Storage Files**:
-- `markets.json` - All market data including bets, prices, and status
+- `markets.json` - All market data including bets, prices, status, multi-outcome details
 - `balances.json` - User balance tracking for deposits/withdrawals
 - `platform-stats.json` - Global platform statistics
 - `user-agreements.json` - Terms of service acceptance tracking
@@ -66,8 +91,17 @@ Preferred communication style: Simple, everyday language.
 
 **Admin-Only Control**: Only the admin wallet (hardcoded address) can create and resolve markets.
 
+**Market Types**:
+- **Binary (Simple)**: YES/NO outcomes
+- **Multi-Outcome**: Multiple candidates/options, each with YES/NO betting
+
+**Timing Types**:
+- **Fixed**: Specific date/time
+- **Flexible**: Date range with custom note
+- **TBD**: To be determined, displays custom timing note
+
 **Resolution Process**:
-1. Admin selects winning outcome (YES/NO)
+1. Admin selects winning outcome (YES/NO for binary, or winning outcome for multi-outcome)
 2. System calculates winner payouts based on proportional pool distribution
 3. Settlement fee deducted from winnings
 4. User balances updated in storage
@@ -82,6 +116,21 @@ Preferred communication style: Simple, everyday language.
 **Admin Verification**: Admin privileges checked by comparing connected wallet address to hardcoded `ADMIN_WALLET_ADDRESS` constant.
 
 **Terms Acceptance**: Local storage tracking of user agreement to terms and conditions before wallet connection.
+
+### Comments & Real-Time Updates
+
+**Comment System**:
+- Users can post comments on active markets
+- Like/unlike comments (real-time updates without refresh)
+- Delete own comments
+- Comment count displayed
+- Real-time refresh mechanism: useEffect watches refreshKey state and automatically reloads market data from S3
+
+**Real-Time Features**:
+- Comments display instantly after posting
+- Likes update without page refresh
+- Delete operations reflected immediately
+- Market data reloaded when refreshKey changes
 
 ### Image Management
 
