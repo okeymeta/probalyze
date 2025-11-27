@@ -420,6 +420,59 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
             )}
           </div>
 
+          {/* Multi-Outcome Candidates Display */}
+          {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 && (
+            <div className="glass-card rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                🗳️ All Candidates
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {market.outcomes.map((outcome) => {
+                  const outcomeTotal = outcome.totalYesAmount + outcome.totalNoAmount;
+                  const outcomeTotalPool = market.totalYesAmount + market.totalNoAmount;
+                  const outcomePercentage = outcomeTotalPool > 0 ? (outcomeTotal / outcomeTotalPool) * 100 : 0;
+                  
+                  return (
+                    <div key={outcome.id} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50 hover:border-purple-500/50 transition-all">
+                      {outcome.imageUrl && (
+                        <img 
+                          src={outcome.imageUrl} 
+                          alt={outcome.name}
+                          className="w-full h-40 rounded-lg object-cover mb-3"
+                          onError={(e) => (e.currentTarget.style.display = 'none')}
+                        />
+                      )}
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-base font-bold text-white">{outcome.name}</h4>
+                          <span className="text-lg font-bold text-purple-400">{outcomePercentage.toFixed(1)}%</span>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          <div>YES: {outcome.totalYesAmount.toFixed(2)} SOL</div>
+                          <div>NO: {outcome.totalNoAmount.toFixed(2)} SOL</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onBetClick({ ...market, selectedOutcomeId: outcome.id })}
+                          className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-sm font-bold py-2 rounded transition-all"
+                        >
+                          YES
+                        </button>
+                        <button
+                          onClick={() => onBetClick({ ...market, selectedOutcomeId: outcome.id })}
+                          className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-sm font-bold py-2 rounded transition-all"
+                        >
+                          NO
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Chart Section */}
           <div className="glass-card rounded-xl p-6">
             {/* Chart Controls */}

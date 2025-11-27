@@ -261,40 +261,77 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         {/* Multi-Outcome Display */}
         {market.marketType === 'multi-outcome' && market.outcomes && market.outcomes.length > 0 ? (
           <div className="space-y-2 mb-4">
-            {market.outcomes.map((outcome) => {
-              const outcomeTotal = outcome.totalYesAmount + outcome.totalNoAmount;
+            {(() => {
               const outcomeTotalPool = market.totalYesAmount + market.totalNoAmount;
-              const outcomePercentage = outcomeTotalPool > 0 ? (outcomeTotal / outcomeTotalPool) * 100 : 0;
-              
+              const outcomesSorted = [...market.outcomes].sort((a, b) => {
+                const aTotal = a.totalYesAmount + a.totalNoAmount;
+                const bTotal = b.totalYesAmount + b.totalNoAmount;
+                return bTotal - aTotal;
+              });
+              const displayOutcomes = outcomesSorted.slice(0, 2);
+              const hasMore = market.outcomes.length > 2;
+
               return (
-                <div key={outcome.id} className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-white">{outcome.name}</span>
-                    <span className="text-base font-bold text-purple-400">{outcomePercentage.toFixed(0)}%</span>
-                  </div>
-                  <div className="flex gap-2">
+                <>
+                  {displayOutcomes.map((outcome) => {
+                    const outcomeTotal = outcome.totalYesAmount + outcome.totalNoAmount;
+                    const outcomePercentage = outcomeTotalPool > 0 ? (outcomeTotal / outcomeTotalPool) * 100 : 0;
+                    
+                    return (
+                      <div key={outcome.id} className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/50">
+                        <div className="flex items-start gap-3 mb-2">
+                          {outcome.imageUrl && (
+                            <img 
+                              src={outcome.imageUrl} 
+                              alt={outcome.name}
+                              className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                              onError={(e) => (e.currentTarget.style.display = 'none')}
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-semibold text-white truncate">{outcome.name}</span>
+                              <span className="text-base font-bold text-purple-400 flex-shrink-0">{outcomePercentage.toFixed(0)}%</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              (onBetClick as any)(market, outcome.id, 'yes');
+                            }}
+                            className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-xs font-bold py-2 rounded transition-all"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              (onBetClick as any)(market, outcome.id, 'no');
+                            }}
+                            className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-xs font-bold py-2 rounded transition-all"
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {hasMore && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        (onBetClick as any)(market, outcome.id, 'yes');
+                        if (onViewMarket) onViewMarket(market);
                       }}
-                      className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-xs font-bold py-2 rounded transition-all"
+                      className="w-full py-2 px-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-300 hover:text-purple-200 text-xs font-bold rounded transition-all"
                     >
-                      Yes
+                      See all {market.outcomes.length} candidates →
                     </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        (onBetClick as any)(market, outcome.id, 'no');
-                      }}
-                      className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-xs font-bold py-2 rounded transition-all"
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
+                  )}
+                </>
               );
-            })}
+            })()}
           </div>
         ) : (
           /* Price Display - DexScreener style (Binary markets) */
