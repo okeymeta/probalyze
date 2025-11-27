@@ -8,6 +8,21 @@ The application features real-time market charts, portfolio tracking, leaderboar
 
 ## Recent Updates (November 27, 2025)
 
+**AI Description Generator - Gemini Integration:**
+- Admin panel now has "Generate" button (✨ wand icon) next to market description field
+- Uses Google Gemini 2.5 Flash model to auto-generate compelling market descriptions
+- Generates 2-3 sentence descriptions that are professional, realistic, and context-aware
+- Button only enabled when market title is entered
+- Secure environment variable handling using `VITE_GOOGLE_API_KEY` prefix (GitHub-safe)
+- Gracefully handles missing API key without breaking the app
+
+**Market Status Tags - "Open" vs "Closed":**
+- Fixed misleading "Closed" tag on multi-outcome markets without a set closing time
+- Markets without `closesAt` time now display "Open" instead of "Closed"
+- "Closed" tag only shows when admin explicitly sets a closing time and it passes
+- Applied to both MarketCard and MarketDetailView components
+- Prevents confusion: users see market is actively trading, not closed
+
 **Complete Multi-Outcome Trading Implementation:**
 - YES/NO buttons on each candidate are fully tradable from both market cards AND detailed views
 - Users can place trades directly from market cards (no need to navigate to details)

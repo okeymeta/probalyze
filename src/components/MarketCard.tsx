@@ -62,6 +62,10 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   // Format time remaining
   const getTimeRemaining = () => {
     if (market.status !== 'active') return null;
+    
+    // If no closesAt time is set, market is still open
+    if (!market.closesAt || market.closesAt === 0) return 'Open';
+    
     const now = Date.now();
     const msRemaining = market.closesAt - now;
     if (msRemaining <= 0) return 'Closed';
