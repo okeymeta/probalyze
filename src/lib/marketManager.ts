@@ -578,6 +578,11 @@ export const toggleCommentLike = async (
       return { success: false, error: 'Comment not found' }
     }
 
+    // Initialize likes array if it doesn't exist
+    if (!comment.likes || !Array.isArray(comment.likes)) {
+      comment.likes = []
+    }
+
     const likeIndex = comment.likes.indexOf(walletAddress)
     if (likeIndex > -1) {
       comment.likes.splice(likeIndex, 1)
