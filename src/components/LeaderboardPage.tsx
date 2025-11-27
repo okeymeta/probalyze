@@ -85,8 +85,24 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ currentUserWal
           userStats[wallet].totalBets++;
           userStats[wallet].totalVolume += bet.amount;
 
-          if (market.status === 'resolved' && market.outcome) {
-            if (bet.prediction === market.outcome) {
+          if (market.status === 'resolved') {
+            let isWinner = false;
+            
+            // Handle multi-outcome markets
+            if (market.marketType === 'multi-outcome' && market.outcomes) {
+              const winningOutcome = market.resolvedOutcomeId;
+              if (bet.outcomeId && bet.outcomeId === winningOutcome && bet.prediction === 'yes') {
+                isWinner = true;
+              }
+            } 
+            // Handle binary markets
+            else if (market.outcome) {
+              if (bet.prediction === market.outcome) {
+                isWinner = true;
+              }
+            }
+            
+            if (isWinner) {
               userStats[wallet].wonBets++;
             } else {
               userStats[wallet].lostBets++;

@@ -13,6 +13,8 @@ interface PortfolioBet {
   actualPayout: number | null;
   timestamp: number;
   isSettled: boolean;
+  outcomeId?: string;
+  outcomeName?: string;
   market: {
     id: string;
     title: string;
@@ -76,8 +78,24 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
           let actualPayout: number | null = null;
           let isSettled = market.status === 'resolved';
           
-          if (isSettled && market.outcome) {
-            if (bet.prediction === market.outcome) {
+          if (isSettled) {
+            let isWinner = false;
+            
+            // Handle multi-outcome markets
+            if (market.marketType === 'multi-outcome' && market.outcomes) {
+              const winningOutcome = market.resolvedOutcomeId;
+              if (bet.outcomeId && bet.outcomeId === winningOutcome && bet.prediction === 'yes') {
+                isWinner = true;
+              }
+            } 
+            // Handle binary markets
+            else if (market.outcome) {
+              if (bet.prediction === market.outcome) {
+                isWinner = true;
+              }
+            }
+            
+            if (isWinner) {
               // Winner - calculate payout
               actualPayout = potentialPayout * 0.97; // After 3% settlement fee
             } else {
@@ -86,6 +104,10 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
             }
           }
 
+          const outcomeName = bet.outcomeId && market.outcomes 
+            ? market.outcomes.find(o => o.id === bet.outcomeId)?.name 
+            : undefined;
+          
           userBets.push({
             id: bet.id,
             marketId: market.id,
@@ -98,6 +120,8 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
             actualPayout,
             timestamp: bet.timestamp,
             isSettled,
+            outcomeId: bet.outcomeId,
+            outcomeName,
             market: {
               id: market.id,
               title: market.title,
