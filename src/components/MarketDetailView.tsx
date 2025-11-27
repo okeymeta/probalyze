@@ -662,7 +662,7 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
                   <span className="text-gray-400 text-sm">Resolve Date</span>
                 </div>
                 <span className="text-white font-bold text-sm">
-                  {new Date(market.resolveTime).toLocaleDateString()}
+                  {getResolveDisplay()}
                 </span>
               </div>
             </div>

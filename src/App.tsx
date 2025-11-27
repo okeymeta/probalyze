@@ -254,13 +254,14 @@ export const App: React.FC = () => {
         setShowAdminDashboard(false);
     };
 
-    const handleBetClick = (market: Market, outcomeId?: string) => {
+    const handleBetClick = (market: Market | (Market & { selectedOutcomeId?: string }), outcomeId?: string) => {
         if (!publicKey) {
             showModal('Please connect your wallet first', 'error');
             return;
         }
+        const extractedOutcomeId = 'selectedOutcomeId' in market ? market.selectedOutcomeId : outcomeId;
         setSelectedMarketForBetting(market);
-        setSelectedOutcomeId(outcomeId);
+        setSelectedOutcomeId(extractedOutcomeId);
     };
 
     const handleResolveClick = (market: Market) => {
