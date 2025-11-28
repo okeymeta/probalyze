@@ -37,11 +37,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ publicKey, stakedAmount, t
         setCompletedTasks([]); // Reset completed tasks list for the new set
         setTaskError(null);
         try {
-            // Replace process.env.API_KEY with the hardcoded Gemini API key
-            const GEMINI_API_KEY = "AIzaSyDJBbPjZgXBgwb-s6ThwmboQrZI1PlxM9c";
+            // Get API key from environment variables (must be exposed as VITE_ prefix for browser)
+            const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
+                                   (import.meta.env.VITE_GOOGLE_API_KEY as string) || '';
+            
             if (!GEMINI_API_KEY) {
-                throw new Error("API key is not available.");
+                throw new Error("Gemini API key not configured. Please add VITE_GEMINI_API_KEY or VITE_GOOGLE_API_KEY environment variable.");
             }
+            
             const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
             const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",

@@ -1,7 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Get API key from Vite's defined environment variable
-const apiKey = (import.meta.env.VITE_GOOGLE_API_KEY as string) || '';
+// Get API key from environment - Try both Vite and direct env vars
+const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
+               (import.meta.env.VITE_GOOGLE_API_KEY as string) || 
+               (typeof window !== 'undefined' && (window as any).__GEMINI_API_KEY) || 
+               '';
 
 // Log for debugging
 if (typeof window !== 'undefined') {
