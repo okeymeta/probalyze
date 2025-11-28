@@ -195,9 +195,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
         }
       }
 
-      const now = Date.now();
-      const closesAt = timingType === 'fixed' ? now + (closesInDays * 24 * 60 * 60 * 1000) : null;
-      const resolveTime = timingType === 'fixed' ? now + (resolveInDays * 24 * 60 * 60 * 1000) : null;
+      // Use exact dates from calendar picker, not recalculated from days
+      const closesAt = timingType === 'fixed' && closesDate ? closesDate.getTime() : null;
+      const resolveTime = timingType === 'fixed' && resolveDate ? resolveDate.getTime() : null;
 
       const validRules = rules.filter(r => r.trim());
 
