@@ -14,6 +14,11 @@ interface MarketListProps {
   refreshTrigger?: number;
 }
 
+interface LoadError {
+  message: string;
+  isNetworkError: boolean;
+}
+
 const CATEGORIES: { value: MarketCategory | 'all'; label: string; icon: string }[] = [
   { value: 'all', label: 'All', icon: '🌐' },
   { value: 'crypto', label: 'Crypto', icon: '₿' },
@@ -41,6 +46,7 @@ export const MarketList: React.FC<MarketListProps> = ({
 }) => {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<LoadError | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'resolved'>('all');
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -54,12 +60,20 @@ export const MarketList: React.FC<MarketListProps> = ({
   const fetchMarkets = useCallback(async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     setIsRefreshing(true);
+    setError(null);
     try {
       const loadedMarkets = await loadMarkets();
       setMarkets(loadedMarkets);
       setLastRefresh(new Date());
-    } catch (err) {
+      setError(null);
+    } catch (err: any) {
       console.error('Error fetching markets:', err);
+      const isNetworkError = err?.isNetworkError || err?.message?.includes('connection') || err?.message?.includes('network');
+      setError({
+        message: err?.message || 'Failed to load markets',
+        isNetworkError
+      });
+      setMarkets([]);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -128,6 +142,27 @@ export const MarketList: React.FC<MarketListProps> = ({
       <div className="flex flex-col items-center justify-center py-20">
         <SpinnerIcon className="h-16 w-16 text-purple-400 animate-spin mb-4" />
         <p className="text-gray-400 text-lg">Loading markets...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-6xl mb-4">⚠️</div>
+        <h3 className="text-2xl font-bold text-white mb-2">Connection Issue</h3>
+        <p className="text-gray-400 mb-6">
+          {error.isNetworkError 
+            ? 'Unable to connect to the server. Retrying automatically...' 
+            : error.message}
+        </p>
+        <button
+          onClick={handleManualRefresh}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all"
+        >
+          <RefreshCcw className="w-4 h-4" />
+          Try Again
+        </button>
       </div>
     );
   }

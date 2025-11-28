@@ -50,26 +50,41 @@ const loadFromFallback = (filename: string): any | null => {
 // Retry logic with exponential backoff
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+export class StorageError extends Error {
+  constructor(message: string, public readonly isNetworkError: boolean = false) {
+    super(message);
+    this.name = 'StorageError';
+  }
+}
+
 const retryWithBackoff = async <T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  initialDelayMs: number = 100
-): Promise<T | null> => {
+  maxRetries: number = 6,
+  initialDelayMs: number = 200
+): Promise<{ data: T | null; error: Error | null }> => {
+  let lastError: Error | null = null;
+  
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      return await fn();
+      const data = await fn();
+      return { data, error: null };
     } catch (error) {
+      lastError = error as Error;
+      
       if (attempt < maxRetries - 1) {
         const delayMs = initialDelayMs * Math.pow(2, attempt);
-        console.warn(`Retry attempt ${attempt + 1}/${maxRetries} in ${delayMs}ms...`);
+        console.warn(`⏱️ Retry attempt ${attempt + 1}/${maxRetries} in ${delayMs}ms... Error: ${lastError.message}`);
         await sleep(delayMs);
       } else {
-        console.error(`Final retry failed:`, error);
-        return null;
+        console.error(`❌ Final retry failed after ${maxRetries} attempts:`, error);
       }
     }
   }
-  return null;
+  
+  return { 
+    data: null, 
+    error: new StorageError(`Failed after ${maxRetries} retries`, true) 
+  };
 };
 
 export interface UploadResponse {
@@ -87,7 +102,7 @@ export const uploadJSONFile = async (
 
   // Try S3 upload first if client is available
   if (s3Client) {
-    const result = await retryWithBackoff(async () => {
+    const { data: uploadSuccess, error } = await retryWithBackoff(async () => {
       const command = new PutObjectCommand({
         Bucket: S3_BUCKET,
         Key: filename,
@@ -98,9 +113,9 @@ export const uploadJSONFile = async (
 
       await s3Client!.send(command);
       return true;
-    }, 3, 100);
+    }, 6, 200);
 
-    if (result) {
+    if (uploadSuccess) {
       const publicUrl = `${S3_ENDPOINT}/${S3_BUCKET}/${filename}`;
       return {
         path: filename,
@@ -109,7 +124,7 @@ export const uploadJSONFile = async (
       };
     }
 
-    console.warn(`S3 upload failed for ${filename}, saving to localStorage fallback...`);
+    console.warn(`⚠️ S3 upload failed for ${filename}, saving to localStorage fallback... (${error?.message})`);
   }
 
   // Fallback to localStorage
@@ -129,11 +144,17 @@ export const uploadJSONFile = async (
   }
 };
 
+export interface DownloadResult {
+  data: any | null;
+  error: Error | null;
+  usedFallback: boolean;
+}
+
 // Download JSON file from S3 with retry logic and localStorage fallback
-export const downloadJSONFile = async (filename: string): Promise<any | null> => {
+export const downloadJSONFile = async (filename: string): Promise<DownloadResult> => {
   // Try S3 first if client is available
   if (s3Client) {
-    const result = await retryWithBackoff(async () => {
+    const { data: result, error } = await retryWithBackoff(async () => {
       const command = new GetObjectCommand({
         Bucket: S3_BUCKET,
         Key: filename,
@@ -154,25 +175,26 @@ export const downloadJSONFile = async (filename: string): Promise<any | null> =>
       saveToFallback(filename, jsonObject);
       
       return jsonObject;
-    }, 3, 100);
+    }, 6, 200);
 
     if (result !== null) {
-      return result;
+      return { data: result, error: null, usedFallback: false };
     }
 
-    console.warn(`S3 download failed for ${filename}, falling back to localStorage cache...`);
+    console.warn(`⚠️ S3 download failed for ${filename}, falling back to localStorage cache... (${error?.message})`);
   }
 
   // Fallback to localStorage if S3 failed or not available
   const fallbackData = loadFromFallback(filename);
   if (fallbackData !== null) {
-    console.log(`✅ Loaded ${filename} from localStorage fallback (cache)`);
-    return fallbackData;
+    console.log(`✅ Loaded ${filename} from localStorage fallback (cached data)`);
+    return { data: fallbackData, error: null, usedFallback: true };
   }
 
-  // Final fallback: return null with warning
-  console.warn(`⚠️ Could not load ${filename} from S3 or localStorage`);
-  return null;
+  // Final fallback: return error
+  const error = new StorageError(`Could not load ${filename} from S3 or localStorage`, true);
+  console.warn(`❌ ${error.message}`);
+  return { data: null, error, usedFallback: false };
 };
 
 // Upload image file to S3
@@ -242,7 +264,7 @@ export const listFiles = async (prefix: string = ''): Promise<string[]> => {
     return [];
   }
 
-  const result = await retryWithBackoff(async () => {
+  const { data: result, error } = await retryWithBackoff(async () => {
     const command = new ListObjectsV2Command({
       Bucket: S3_BUCKET,
       Prefix: prefix,
@@ -251,7 +273,11 @@ export const listFiles = async (prefix: string = ''): Promise<string[]> => {
 
     const response = await s3Client!.send(command);
     return response.Contents?.map((item) => item.Key || '') || [];
-  }, 3, 100);
+  }, 6, 200);
+
+  if (error) {
+    console.warn(`⚠️ Failed to list files: ${error.message}`);
+  }
 
   return result || [];
 };

@@ -8,15 +8,17 @@ The application features real-time market charts, portfolio tracking, leaderboar
 
 ## Recent Updates (November 28, 2025)
 
-**Robust Market Loading System - Fixed Intermittent Loading Failures:**
-- Added retry logic with exponential backoff (3 retries, 100ms+ delays) to S3 operations
-- Implemented localStorage fallback cache for when S3 is unavailable or timeouts occur
-- When S3 download succeeds, data is automatically cached to localStorage as backup
-- If S3 fails, system automatically falls back to cached data in localStorage
-- Applied to both download and upload operations
-- Applied to list files operation
+**Ultra-Robust Market Loading System - Fixed Intermittent Loading Failures:**
+- Increased retry logic to **6 retries with exponential backoff** (200ms+ delays) - total ~12 seconds retry window
+- Implemented **localStorage fallback cache** for when S3 is unavailable or timeouts occur
+- When S3 download succeeds, data is automatically cached to localStorage as backup for future fallback
+- If S3 fails after all retries, system uses cached data from localStorage seamlessly
+- Applied to all storage operations: download, upload, list files
+- **Improved error handling**: Instead of "No Markets Yet", shows proper error UI with retry button
+- Distinguishes between **actual empty state** vs **connection errors** vs **loading state**
+- Shows "Connection Issue" ⚠️ when network problem detected, with "Try Again" button
+- Automatic retry notifications in logs show each attempt
 - Markets now load reliably even with temporary network issues
-- Clear logging shows fallback mechanism at work
 
 **Gemini API Configuration Fixed:**
 - Removed hardcoded invalid API key from Dashboard.tsx (was causing 400 errors)

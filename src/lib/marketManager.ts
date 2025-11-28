@@ -83,14 +83,18 @@ export const loadMarkets = async (): Promise<Market[]> => {
       await initializeStorageFiles()
     }
     
-    const data = await downloadJSONFile(MARKETS_FILE)
-    if (!data || !data.markets) {
+    const result = await downloadJSONFile(MARKETS_FILE)
+    if (result.error) {
+      console.error('Error loading markets:', result.error)
+      throw result.error
+    }
+    if (!result.data || !result.data.markets) {
       return []
     }
-    return data.markets
+    return result.data.markets
   } catch (err) {
     console.error('Error loading markets:', err)
-    return []
+    throw err
   }
 }
 
@@ -117,8 +121,11 @@ export const loadBalances = async (): Promise<Record<string, UserBalance>> => {
       await initializeStorageFiles()
     }
     
-    const data = await downloadJSONFile(BALANCES_FILE)
-    return data || {}
+    const result = await downloadJSONFile(BALANCES_FILE)
+    if (result.error && !result.usedFallback) {
+      console.error('Error loading balances:', result.error)
+    }
+    return result.data || {}
   } catch (err) {
     console.error('Error loading balances:', err)
     return {}
@@ -189,8 +196,11 @@ export const updateUserBalance = async (
 // Load platform stats
 export const loadPlatformStats = async (): Promise<PlatformStats> => {
   try {
-    const data = await downloadJSONFile(PLATFORM_STATS_FILE)
-    return data || getDefaultPlatformStats()
+    const result = await downloadJSONFile(PLATFORM_STATS_FILE)
+    if (result.error && !result.usedFallback) {
+      console.error('Error loading platform stats:', result.error)
+    }
+    return result.data || getDefaultPlatformStats()
   } catch (err) {
     console.error('Error loading platform stats:', err)
     return getDefaultPlatformStats()
@@ -211,8 +221,11 @@ export const savePlatformStats = async (stats: PlatformStats): Promise<boolean> 
 // User Agreements
 export const loadUserAgreements = async (): Promise<Record<string, UserAgreement>> => {
   try {
-    const data = await downloadJSONFile(USER_AGREEMENTS_FILE)
-    return data || {}
+    const result = await downloadJSONFile(USER_AGREEMENTS_FILE)
+    if (result.error && !result.usedFallback) {
+      console.error('Error loading user agreements:', result.error)
+    }
+    return result.data || {}
   } catch (err) {
     console.error('Error loading user agreements:', err)
     return {}
@@ -239,8 +252,11 @@ export const getUserAgreement = async (walletAddress: string): Promise<UserAgree
 // Copy Trades
 export const loadCopyTrades = async (): Promise<CopyTradeAction[]> => {
   try {
-    const data = await downloadJSONFile(COPY_TRADES_FILE)
-    return data?.trades || []
+    const result = await downloadJSONFile(COPY_TRADES_FILE)
+    if (result.error && !result.usedFallback) {
+      console.error('Error loading copy trades:', result.error)
+    }
+    return result.data?.trades || []
   } catch (err) {
     console.error('Error loading copy trades:', err)
     return []
