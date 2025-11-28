@@ -1326,3 +1326,47 @@ export const calculatePriceChange = (market: Market): number => {
   
   return currentYesPercentage - initialYesPercentage
 }
+
+// Sell/exit a position early at current market price
+export const sellPosition = async (
+  marketId: string,
+  betId: string,
+  walletAddress: string
+): Promise<{ success: boolean; exitValue: number; error?: string }> => {
+  try {
+    const markets = await loadMarkets()
+    const market = markets.find(m => m.id === marketId)
+    if (!market) return { success: false, exitValue: 0, error: 'Market not found' }
+
+    const bet = market.bets.find(b => b.id === betId && b.walletAddress === walletAddress)
+    if (!bet) return { success: false, exitValue: 0, error: 'Bet not found' }
+
+    // Calculate current market value based on pool
+    const totalPool = market.totalYesAmount + market.totalNoAmount
+    if (totalPool === 0) return { success: false, exitValue: 0, error: 'No market liquidity' }
+
+    const winningPool = bet.prediction === 'yes' ? market.totalYesAmount : market.totalNoAmount
+    if (winningPool === 0) return { success: false, exitValue: 0, error: 'No liquidity for your side' }
+
+    // Exit value = proportional share of pool
+    const exitValue = (bet.amount / winningPool) * totalPool
+    
+    // Remove bet from market
+    market.bets = market.bets.filter(b => b.id !== betId)
+    market.totalYesAmount = bet.prediction === 'yes' ? market.totalYesAmount - bet.amount : market.totalYesAmount
+    market.totalNoAmount = bet.prediction === 'no' ? market.totalNoAmount - bet.amount : market.totalNoAmount
+
+    // Update user balance with exit proceeds
+    await updateUserBalance(walletAddress, exitValue, 'exit')
+
+    // Save updated market
+    const saved = await saveMarkets(markets)
+    if (saved) {
+      return { success: true, exitValue }
+    } else {
+      return { success: false, exitValue: 0, error: 'Failed to save market' }
+    }
+  } catch (err) {
+    return { success: false, exitValue: 0, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}

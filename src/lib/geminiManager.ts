@@ -47,11 +47,17 @@ Generate only the description text:`;
   try {
     const response = await client.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: prompt,
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }]
+        }
+      ]
     });
 
     return response.text || "Unable to generate description. Please try again.";
   } catch (error) {
+    console.error('Gemini API Error:', error);
     throw new Error(`Failed to generate description: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }

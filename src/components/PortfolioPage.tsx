@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Wallet, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, BarChart3, RefreshCw, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { loadMarkets, getUserBalance } from '../lib/marketManager';
+import { Wallet, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, BarChart3, RefreshCw, ArrowUpRight, ArrowDownRight, LogOut } from 'lucide-react';
+import { loadMarkets, getUserBalance, sellPosition } from '../lib/marketManager';
 import { Market, Bet, UserBalance } from '../types';
 
 interface PortfolioBet {
@@ -49,6 +49,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'settled'>('all');
+  const [sellLoading, setSellLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPortfolio();
@@ -449,9 +450,34 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="text-xs text-gray-500">{formatDate(bet.timestamp)}</span>
+                        <div className="flex items-center justify-end gap-2">
+                          <span className="text-xs text-gray-500">{formatDate(bet.timestamp)}</span>
+                          {!bet.isSettled && (
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                setSellLoading(bet.id);
+                                try {
+                                  const result = await sellPosition(bet.marketId, bet.id, walletAddress);
+                                  if (result.success) {
+                                    await fetchPortfolio();
+                                  } else {
+                                    setError(result.error || 'Failed to exit position');
+                                  }
+                                } finally {
+                                  setSellLoading(null);
+                                }
+                              }}
+                              disabled={sellLoading === bet.id}
+                              className="text-xs px-2 py-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded transition-all disabled:opacity-50 flex items-center gap-1"
+                              title="Exit early at current market price"
+                            >
+                              <LogOut className="w-3 h-3" />
+                              {sellLoading === bet.id ? 'Exiting...' : 'Exit'}
+                            </button>
+                          )}
+                        </div>
                       </td>
-                    </tr>
                   );
                 })}
               </tbody>
