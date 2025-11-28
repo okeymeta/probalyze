@@ -432,13 +432,21 @@ export const MarketDetailView: React.FC<MarketDetailViewProps> = ({
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => onBetClick({ ...market, selectedOutcomeId: outcome.id })}
+                          onClick={() => {
+                            const marketWithOutcome = { ...market };
+                            (marketWithOutcome as any).selectedOutcomeId = outcome.id;
+                            onBetClick(marketWithOutcome);
+                          }}
                           className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 text-sm font-bold py-2 rounded transition-all"
                         >
                           YES
                         </button>
                         <button
-                          onClick={() => onBetClick({ ...market, selectedOutcomeId: outcome.id })}
+                          onClick={() => {
+                            const marketWithOutcome = { ...market };
+                            (marketWithOutcome as any).selectedOutcomeId = outcome.id;
+                            onBetClick(marketWithOutcome);
+                          }}
                           className="flex-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 text-sm font-bold py-2 rounded transition-all"
                         >
                           NO
