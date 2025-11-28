@@ -227,6 +227,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
         setInitialYesPrice(50);
         setClosesInDays(7);
         setResolveInDays(8);
+        setClosesDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+        setResolveDate(new Date(Date.now() + 8 * 24 * 60 * 60 * 1000));
+        setShowClosesPicker(false);
+        setShowResolvePicker(false);
         setTimingNote('');
         setImageFile(null);
         setImagePreview('');
@@ -247,13 +251,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
   };
 
   const getCloseDate = () => {
-    const date = new Date(Date.now() + (closesInDays * 24 * 60 * 60 * 1000));
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    if (closesDate) return closesDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(Date.now() + (closesInDays * 24 * 60 * 60 * 1000)).toLocaleDateString();
   };
 
   const getResolveDate = () => {
-    const date = new Date(Date.now() + (resolveInDays * 24 * 60 * 60 * 1000));
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    if (resolveDate) return resolveDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(Date.now() + (resolveInDays * 24 * 60 * 60 * 1000)).toLocaleDateString();
+  };
+
+  const handleClosesDateChange = (date: Date | undefined) => {
+    if (date) {
+      setClosesDate(date);
+      const now = Date.now();
+      const daysUntil = Math.ceil((date.getTime() - now) / (24 * 60 * 60 * 1000));
+      setClosesInDays(Math.max(1, daysUntil));
+      setShowClosesPicker(false);
+    }
+  };
+
+  const handleResolveDateChange = (date: Date | undefined) => {
+    if (date) {
+      setResolveDate(date);
+      const now = Date.now();
+      const daysUntil = Math.ceil((date.getTime() - now) / (24 * 60 * 60 * 1000));
+      setResolveInDays(Math.max(1, daysUntil));
+      setShowResolvePicker(false);
+    }
   };
 
   return (
@@ -467,30 +491,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
 
           {timingType === 'fixed' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-300 mb-2 text-sm">Closes In (Days) 🔒</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={closesInDays}
-                  onChange={(e) => setClosesInDays(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">Betting closes: {getCloseDate()}</p>
+              <div className="relative">
+                <label className="block text-gray-300 mb-2 text-sm font-semibold">Closes 🔒</label>
+                <button
+                  type="button"
+                  onClick={() => setShowClosesPicker(!showClosesPicker)}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center justify-between hover:border-purple-500/50 transition-all"
+                >
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {getCloseDate()}
+                  </span>
+                </button>
+                {showClosesPicker && (
+                  <div className="absolute top-full left-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg p-3 z-50 shadow-2xl">
+                    <DayPicker
+                      mode="single"
+                      selected={closesDate}
+                      onSelect={handleClosesDateChange}
+                      disabled={(date) => date < new Date()}
+                      fromDate={new Date()}
+                      toDate={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000)}
+                      className="text-white"
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">{closesInDays} days from now</p>
               </div>
 
-              <div>
-                <label className="block text-gray-300 mb-2 text-sm">Resolve In (Days) ⚖️</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={resolveInDays}
-                  onChange={(e) => setResolveInDays(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">Will resolve: {getResolveDate()}</p>
+              <div className="relative">
+                <label className="block text-gray-300 mb-2 text-sm font-semibold">Resolves ⚖️</label>
+                <button
+                  type="button"
+                  onClick={() => setShowResolvePicker(!showResolvePicker)}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center justify-between hover:border-purple-500/50 transition-all"
+                >
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {getResolveDate()}
+                  </span>
+                </button>
+                {showResolvePicker && (
+                  <div className="absolute top-full left-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg p-3 z-50 shadow-2xl">
+                    <DayPicker
+                      mode="single"
+                      selected={resolveDate}
+                      onSelect={handleResolveDateChange}
+                      disabled={(date) => date <= (closesDate || new Date())}
+                      fromDate={closesDate || new Date()}
+                      toDate={new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000)}
+                      className="text-white"
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">{resolveInDays} days from now</p>
               </div>
             </div>
           ) : (

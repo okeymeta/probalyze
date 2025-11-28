@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Market, MarketCategory } from '../types';
-import { loadMarkets } from '../lib/marketManager';
+import { loadMarkets, personalizeMarketsForUser } from '../lib/marketManager';
 import { MarketCard } from './MarketCard';
 import SpinnerIcon from './icons/SpinnerIcon';
 import { RefreshCcw, Search, X, Filter, ChevronDown } from 'lucide-react';
@@ -63,7 +63,9 @@ export const MarketList: React.FC<MarketListProps> = ({
     setError(null);
     try {
       const loadedMarkets = await loadMarkets();
-      setMarkets(loadedMarkets);
+      // Apply smart personalization algorithm for logged-in users
+      const personalizedMarkets = await personalizeMarketsForUser(loadedMarkets, userWallet);
+      setMarkets(personalizedMarkets);
       setLastRefresh(new Date());
       setError(null);
     } catch (err: any) {
@@ -78,7 +80,7 @@ export const MarketList: React.FC<MarketListProps> = ({
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [userWallet]);
 
   // Initial load and manual refresh trigger
   useEffect(() => {

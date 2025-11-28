@@ -1397,3 +1397,87 @@ export const sellPosition = async (
     return { success: false, exitValue: 0, exitFee: 0, error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
+
+// Smart personalization algorithm - analyzes user behavior and personalizes market feed
+export const personalizeMarketsForUser = async (markets: Market[], walletAddress?: string): Promise<Market[]> => {
+  if (!walletAddress || markets.length === 0) {
+    // If no user or no markets, return slightly randomized
+    return randomizeMarkets(markets);
+  }
+
+  try {
+    const userBets = await getUserBetHistory(walletAddress);
+    
+    // Build user profile from trading history
+    const userProfile = {
+      preferredCategories: new Map<MarketCategory | string, number>(),
+      tradeFrequency: userBets.length,
+      avgBetSize: userBets.length > 0 ? userBets.reduce((sum, b) => sum + (b.amount || 0), 0) / userBets.length : 0,
+      totalTraded: userBets.reduce((sum, b) => sum + (b.amount || 0), 0),
+    };
+
+    // Count category preferences
+    userBets.forEach(bet => {
+      const market = markets.find(m => m.bets?.some(b => b.id === bet.id));
+      if (market) {
+        const count = userProfile.preferredCategories.get(market.category) || 0;
+        userProfile.preferredCategories.set(market.category, count + 1);
+      }
+    });
+
+    // Score markets based on user profile
+    const scoredMarkets = markets.map(market => {
+      let score = 50; // Base score
+      
+      // Category preference (up to 30 points)
+      const categoryCount = userProfile.preferredCategories.get(market.category) || 0;
+      score += Math.min(30, categoryCount * 5);
+      
+      // Market activity (up to 15 points)
+      const totalBets = market.bets?.length || 0;
+      score += Math.min(15, (totalBets / 100) * 15);
+      
+      // Pool size preference (up to 10 points) - mid-size pools
+      const totalPool = market.totalYesAmount + market.totalNoAmount;
+      if (totalPool > 0 && totalPool < userProfile.avgBetSize * 1000) {
+        score += 10;
+      }
+      
+      // Randomization for exploration (±10 points)
+      score += (Math.random() - 0.5) * 20;
+      
+      return { market, score };
+    });
+
+    // Sort by score and return
+    return scoredMarkets
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.market);
+  } catch (err) {
+    console.warn('Personalization failed, returning randomized markets:', err);
+    return randomizeMarkets(markets);
+  }
+};
+
+// Get user's bet history for personalization
+const getUserBetHistory = async (walletAddress: string): Promise<Bet[]> => {
+  try {
+    const markets = await loadMarkets();
+    const userBets: Bet[] = [];
+    
+    markets.forEach(market => {
+      const bets = market.bets?.filter(b => b.walletAddress === walletAddress) || [];
+      userBets.push(...bets);
+    });
+    
+    return userBets;
+  } catch (err) {
+    console.warn('Failed to load user bet history:', err);
+    return [];
+  }
+};
+
+// Randomize markets slightly for exploration
+const randomizeMarkets = (markets: Market[]): Market[] => {
+  return [...markets].sort(() => Math.random() - 0.5);
+};
