@@ -4,7 +4,9 @@ import { uploadImage } from '../lib/storageManager';
 import { generateMarketDescription } from '../lib/geminiManager';
 import { MarketCategory, MarketType, TimingType } from '../types';
 import SpinnerIcon from './icons/SpinnerIcon';
-import { Plus, Trash2, X, Wand2 } from 'lucide-react';
+import { Plus, Trash2, X, Wand2, Calendar } from 'lucide-react';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 
 interface OutcomeInput {
   id: string;
@@ -27,6 +29,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
   const [initialYesPrice, setInitialYesPrice] = useState(50);
   const [closesInDays, setClosesInDays] = useState(7);
   const [resolveInDays, setResolveInDays] = useState(8);
+  const [closesDate, setClosesDate] = useState<Date | undefined>(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  const [resolveDate, setResolveDate] = useState<Date | undefined>(new Date(Date.now() + 8 * 24 * 60 * 60 * 1000));
+  const [showClosesPicker, setShowClosesPicker] = useState(false);
+  const [showResolvePicker, setShowResolvePicker] = useState(false);
   const [timingNote, setTimingNote] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
