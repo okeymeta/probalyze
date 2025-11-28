@@ -1357,7 +1357,7 @@ export const sellPosition = async (
     market.totalNoAmount = bet.prediction === 'no' ? market.totalNoAmount - bet.amount : market.totalNoAmount
 
     // Update user balance with exit proceeds
-    await updateUserBalance(walletAddress, exitValue, 'exit')
+    await updateUserBalance(walletAddress, exitValue, 'withdraw')
 
     // Save updated market
     const saved = await saveMarkets(markets)

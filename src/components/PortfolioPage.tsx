@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Wallet, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, BarChart3, RefreshCw, ArrowUpRight, ArrowDownRight, LogOut } from 'lucide-react';
-import { loadMarkets, getUserBalance, sellPosition } from '../lib/marketManager';
+import { Wallet, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, BarChart3, RefreshCw, ArrowUpRight, ArrowDownRight, LogOut, Send } from 'lucide-react';
+import { loadMarkets, getUserBalance, sellPosition, updateUserBalance } from '../lib/marketManager';
 import { Market, Bet, UserBalance } from '../types';
 
 interface PortfolioBet {
@@ -50,6 +50,9 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'settled'>('all');
   const [sellLoading, setSellLoading] = useState<string | null>(null);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   useEffect(() => {
     fetchPortfolio();
@@ -245,14 +248,86 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
           <h1 className="text-3xl font-bold text-white mb-2">Your Portfolio</h1>
           <p className="text-gray-400">Track your predictions and performance</p>
         </div>
-        <button
-          onClick={fetchPortfolio}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all border border-gray-700"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowWithdraw(!showWithdraw)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all"
+          >
+            <Send className="w-4 h-4" />
+            Withdraw
+          </button>
+          <button
+            onClick={fetchPortfolio}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all border border-gray-700"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {/* Withdraw Modal */}
+      {showWithdraw && (
+        <div className="mb-8 glass-card rounded-xl p-6 border border-blue-500/30">
+          <h3 className="text-lg font-bold text-white mb-4">Send to Your Wallet</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Amount (SOL)</label>
+              <input
+                type="number"
+                value={withdrawAmount}
+                onChange={(e) => setWithdrawAmount(e.target.value)}
+                placeholder="0.00"
+                min="0"
+                max={data?.user.balance || 0}
+                step="0.01"
+                className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Available: {formatSOL(data?.user.balance || 0)}</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  setIsWithdrawing(true);
+                  try {
+                    const amount = parseFloat(withdrawAmount);
+                    if (!amount || amount <= 0) {
+                      setError('Please enter a valid amount');
+                      return;
+                    }
+                    if (amount > (data?.user.balance || 0)) {
+                      setError('Insufficient balance');
+                      return;
+                    }
+                    // Simulate sending to wallet - in production, integrate with Solana
+                    await updateUserBalance(walletAddress, -amount, 'withdraw');
+                    await fetchPortfolio();
+                    setWithdrawAmount('');
+                    setShowWithdraw(false);
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : 'Withdrawal failed');
+                  } finally {
+                    setIsWithdrawing(false);
+                  }
+                }}
+                disabled={isWithdrawing || !withdrawAmount}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold disabled:opacity-50 transition-all"
+              >
+                {isWithdrawing ? 'Sending...' : 'Send to Wallet'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowWithdraw(false);
+                  setWithdrawAmount('');
+                }}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -478,6 +553,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                           )}
                         </div>
                       </td>
+                    </tr>
                   );
                 })}
               </tbody>
