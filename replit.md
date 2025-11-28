@@ -6,7 +6,22 @@ Probalyze is a decentralized prediction market platform built on Solana, allowin
 
 The application features real-time market charts, portfolio tracking, leaderboards, and comprehensive admin controls for market creation and resolution. All market data and user balances are stored in S3-compatible storage (Supabase), with optional Turso database integration via Drizzle ORM.
 
-## Recent Updates (November 27, 2025)
+## Recent Updates (November 28, 2025)
+
+**Multi-Outcome Market UI Improvements:**
+- "Trade Now" button now disabled on multi-outcome markets - shows "Select Candidate" tooltip
+- Forces users to select a specific candidate before trading (prevents accidental wrong bets)
+- Binary markets still show active "Trade Now" button as before
+- Clear visual feedback: disabled button is grayed out with 50% opacity
+
+**Early Exit Fee Implementation:**
+- Early exit/sell positions now charge 2.5% fee (same as platform bet fee)
+- Fee deducted from exit proceeds: user gets 97.5% of proportional pool value
+- Exit fees tracked in platform stats (totalFees and last24hFees)
+- User sees exit confirmation: "Exited position: X SOL (Y fee deducted)"
+- Market's platformFeesCollected updated to include exit fees
+
+## Previous Updates (November 27, 2025)
 
 **AI Description Generator - Gemini Integration:**
 - Admin panel now has "Generate" button (✨ wand icon) next to market description field

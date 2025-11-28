@@ -535,6 +535,9 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
                                 try {
                                   const result = await sellPosition(bet.marketId, bet.id, walletAddress);
                                   if (result.success) {
+                                    // Show exit fee info in a toast or message
+                                    const message = `Exited position: ${formatSOL(result.exitValue)} (${formatSOL(result.exitFee)} fee deducted)`;
+                                    alert(message);
                                     await fetchPortfolio();
                                   } else {
                                     setError(result.error || 'Failed to exit position');

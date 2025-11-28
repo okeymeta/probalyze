@@ -531,9 +531,15 @@ export const MarketCard: React.FC<MarketCardProps> = ({
                 e.stopPropagation();
                 onBetClick(market);
               }}
-              className="flex-1 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 text-sm sm:text-base"
+              disabled={market.marketType === 'multi-outcome'}
+              className={`flex-1 bg-linear-to-r from-purple-600 to-blue-600 text-white font-bold py-2.5 sm:py-3 px-4 rounded-lg transition-all text-sm sm:text-base ${
+                market.marketType === 'multi-outcome'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40'
+              }`}
+              title={market.marketType === 'multi-outcome' ? 'Select a candidate first' : 'Place a bet'}
             >
-              Trade Now
+              {market.marketType === 'multi-outcome' ? 'Select Candidate' : 'Trade Now'}
             </button>
           )}
           

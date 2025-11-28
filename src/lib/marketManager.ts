@@ -1332,41 +1332,52 @@ export const sellPosition = async (
   marketId: string,
   betId: string,
   walletAddress: string
-): Promise<{ success: boolean; exitValue: number; error?: string }> => {
+): Promise<{ success: boolean; exitValue: number; exitFee: number; error?: string }> => {
   try {
     const markets = await loadMarkets()
     const market = markets.find(m => m.id === marketId)
-    if (!market) return { success: false, exitValue: 0, error: 'Market not found' }
+    if (!market) return { success: false, exitValue: 0, exitFee: 0, error: 'Market not found' }
 
     const bet = market.bets.find(b => b.id === betId && b.walletAddress === walletAddress)
-    if (!bet) return { success: false, exitValue: 0, error: 'Bet not found' }
+    if (!bet) return { success: false, exitValue: 0, exitFee: 0, error: 'Bet not found' }
 
     // Calculate current market value based on pool
     const totalPool = market.totalYesAmount + market.totalNoAmount
-    if (totalPool === 0) return { success: false, exitValue: 0, error: 'No market liquidity' }
+    if (totalPool === 0) return { success: false, exitValue: 0, exitFee: 0, error: 'No market liquidity' }
 
     const winningPool = bet.prediction === 'yes' ? market.totalYesAmount : market.totalNoAmount
-    if (winningPool === 0) return { success: false, exitValue: 0, error: 'No liquidity for your side' }
+    if (winningPool === 0) return { success: false, exitValue: 0, exitFee: 0, error: 'No liquidity for your side' }
 
     // Exit value = proportional share of pool
-    const exitValue = (bet.amount / winningPool) * totalPool
+    const grossExitValue = (bet.amount / winningPool) * totalPool
+    
+    // Apply 2.5% exit fee (same as platform fee)
+    const exitFee = grossExitValue * (PLATFORM_FEE_PERCENTAGE / 100)
+    const netExitValue = grossExitValue - exitFee
     
     // Remove bet from market
     market.bets = market.bets.filter(b => b.id !== betId)
     market.totalYesAmount = bet.prediction === 'yes' ? market.totalYesAmount - bet.amount : market.totalYesAmount
     market.totalNoAmount = bet.prediction === 'no' ? market.totalNoAmount - bet.amount : market.totalNoAmount
+    market.platformFeesCollected += exitFee
 
-    // Update user balance with exit proceeds
-    await updateUserBalance(walletAddress, exitValue, 'withdraw')
+    // Update user balance with exit proceeds (after fee)
+    await updateUserBalance(walletAddress, netExitValue, 'withdraw')
 
     // Save updated market
     const saved = await saveMarkets(markets)
     if (saved) {
-      return { success: true, exitValue }
+      // Update platform stats with exit fee
+      const stats = await loadPlatformStats()
+      stats.totalFees += exitFee
+      stats.last24hFees += exitFee
+      await savePlatformStats(stats)
+      
+      return { success: true, exitValue: netExitValue, exitFee }
     } else {
-      return { success: false, exitValue: 0, error: 'Failed to save market' }
+      return { success: false, exitValue: 0, exitFee: 0, error: 'Failed to save market' }
     }
   } catch (err) {
-    return { success: false, exitValue: 0, error: err instanceof Error ? err.message : 'Unknown error' }
+    return { success: false, exitValue: 0, exitFee: 0, error: err instanceof Error ? err.message : 'Unknown error' }
   }
 }
