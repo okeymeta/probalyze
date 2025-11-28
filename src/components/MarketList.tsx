@@ -27,24 +27,24 @@ const CATEGORIES: { value: MarketCategory | 'all'; label: string; icon: string }
   { value: 'weather', label: 'Weather', icon: '🌤️' },
   { value: 'science', label: 'Science', icon: '🔬' },
   { value: 'esports', label: 'Esports', icon: '🎮' },
-  { value: 'AI', label: 'AI', icon: '🤖' },
+  { value: 'ai', label: 'AI', icon: '🤖' },
   { value: 'other', label: 'Other', icon: '📌' },
 ];
 
-export const MarketList: React.FC<MarketListProps> = ({ 
-  userWallet, 
-  isAdmin, 
-  onBetClick, 
+export const MarketList: React.FC<MarketListProps> = ({
+  userWallet,
+  isAdmin,
+  onBetClick,
   onResolveClick,
   onViewMarket,
-  refreshTrigger 
+  refreshTrigger
 }) => {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'resolved'>('all');
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
   // Search and category filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MarketCategory | 'all'>('all');
@@ -95,10 +95,10 @@ export const MarketList: React.FC<MarketListProps> = ({
       // Status filter
       if (filter === 'active' && market.status !== 'active') return false;
       if (filter === 'resolved' && market.status !== 'resolved') return false;
-      
+
       // Category filter
       if (selectedCategory !== 'all' && market.category !== selectedCategory) return false;
-      
+
       // Search filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -107,7 +107,7 @@ export const MarketList: React.FC<MarketListProps> = ({
         const matchesCategory = market.category.toLowerCase().includes(query);
         if (!matchesTitle && !matchesDescription && !matchesCategory) return false;
       }
-      
+
       return true;
     });
   }, [markets, filter, selectedCategory, searchQuery]);
@@ -199,11 +199,10 @@ export const MarketList: React.FC<MarketListProps> = ({
                     setSelectedCategory(cat.value);
                     setShowMobileFilters(false);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                    selectedCategory === cat.value
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedCategory === cat.value
                       ? 'bg-purple-600 text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                    }`}
                 >
                   <span>{cat.icon}</span>
                   <span>{cat.label}</span>
@@ -220,11 +219,10 @@ export const MarketList: React.FC<MarketListProps> = ({
             <button
               key={cat.value}
               onClick={() => setSelectedCategory(cat.value)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                selectedCategory === cat.value
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === cat.value
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:border-purple-500/50'
-              }`}
+                }`}
             >
               <span>{cat.icon}</span>
               <span>{cat.label}</span>
@@ -241,36 +239,33 @@ export const MarketList: React.FC<MarketListProps> = ({
         <div className="flex-1 flex gap-1 sm:gap-2 bg-gray-800 rounded-lg p-1">
           <button
             onClick={() => setFilter('all')}
-            className={`flex-1 py-2 px-2 sm:px-4 rounded-md font-semibold text-sm sm:text-base transition-all ${
-              filter === 'all' 
-                ? 'bg-purple-600 text-white' 
+            className={`flex-1 py-2 px-2 sm:px-4 rounded-md font-semibold text-sm sm:text-base transition-all ${filter === 'all'
+                ? 'bg-purple-600 text-white'
                 : 'text-gray-400 hover:text-white'
-            }`}
+              }`}
           >
             All ({markets.length})
           </button>
           <button
             onClick={() => setFilter('active')}
-            className={`flex-1 py-2 px-2 sm:px-4 rounded-md font-semibold text-sm sm:text-base transition-all ${
-              filter === 'active' 
-                ? 'bg-green-600 text-white' 
+            className={`flex-1 py-2 px-2 sm:px-4 rounded-md font-semibold text-sm sm:text-base transition-all ${filter === 'active'
+                ? 'bg-green-600 text-white'
                 : 'text-gray-400 hover:text-white'
-            }`}
+              }`}
           >
             Active ({markets.filter(m => m.status === 'active').length})
           </button>
           <button
             onClick={() => setFilter('resolved')}
-            className={`flex-1 py-2 px-2 sm:px-4 rounded-md font-semibold text-sm sm:text-base transition-all ${
-              filter === 'resolved' 
-                ? 'bg-blue-600 text-white' 
+            className={`flex-1 py-2 px-2 sm:px-4 rounded-md font-semibold text-sm sm:text-base transition-all ${filter === 'resolved'
+                ? 'bg-blue-600 text-white'
                 : 'text-gray-400 hover:text-white'
-            }`}
+              }`}
           >
             Resolved ({markets.filter(m => m.status === 'resolved').length})
           </button>
         </div>
-        
+
         {/* Refresh Button */}
         <button
           onClick={handleManualRefresh}
@@ -327,8 +322,8 @@ export const MarketList: React.FC<MarketListProps> = ({
           <div className="text-5xl mb-4">🔍</div>
           <h3 className="text-xl font-bold text-white mb-2">No markets found</h3>
           <p className="text-gray-400 mb-4">
-            {searchQuery 
-              ? `No markets match "${searchQuery}"` 
+            {searchQuery
+              ? `No markets match "${searchQuery}"`
               : `No ${filter !== 'all' ? filter : ''} markets in ${selectedCategory !== 'all' ? CATEGORIES.find(c => c.value === selectedCategory)?.label : 'this category'}`
             }
           </p>
