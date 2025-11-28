@@ -88,7 +88,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
 
             // Handle multi-outcome markets
             if (market.marketType === 'multi-outcome' && market.outcomes) {
-              const winningOutcome = (market as any).resolvedOutcomeId;
+              const winningOutcome = (market as any).winningOutcomeId;
               if (bet.outcomeId && bet.outcomeId === winningOutcome && bet.prediction === 'yes') {
                 isWinner = true;
               }
@@ -101,9 +101,9 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ walletAddress, onM
             }
 
             if (isWinner) {
-
-              // Winner - calculate payout
-              actualPayout = potentialPayout * 0.97; // After 3% settlement fee
+              // Winner - payout already includes settlement fee deduction from resolution
+              // potentialPayout already has 3% settlement fee applied
+              actualPayout = potentialPayout;
             } else {
               // Loser - lost the bet
               actualPayout = 0;
