@@ -24,6 +24,10 @@ export const PLATFORM_NAME = 'Probalyze';
 export const PLATFORM_TAGLINE = 'Predict. Trade. Profit.';
 export const PLATFORM_DESCRIPTION = 'The world\'s most advanced prediction market platform on Solana. Real-time charts, transparent fees, instant settlements.';
 
+// Task & Earning related (legacy/unused)
+export const ESTIMATED_APY = 50;
+export const REWARD_PER_TASK = 0.1;
+
 export const TESTIMONIALS: Testimonial[] = [
     {
         quote: "Probalyze has the best UX I've seen in prediction markets. Clean, fast, and profitable.",

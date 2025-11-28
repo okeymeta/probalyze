@@ -8,6 +8,14 @@ The application features real-time market charts, portfolio tracking, leaderboar
 
 ## Recent Updates (November 28, 2025)
 
+**Gemini API Configuration Fixed:**
+- Removed hardcoded invalid API key from Dashboard.tsx (was causing 400 errors)
+- Updated geminiManager.ts and Dashboard.tsx to properly use environment variables
+- API key now correctly loaded from GEMINI_API_KEY secret (exposed as VITE_GEMINI_API_KEY for browser)
+- Fixed LSP errors by adding missing constants (ESTIMATED_APY, REWARD_PER_TASK)
+- Verified: "🔍 Gemini API Key Status: ✅ Loaded" in browser logs
+- Market description generation now works correctly with Gemini 2.5 Flash model
+
 **Multi-Outcome Market UI Improvements:**
 - "Trade Now" button now disabled on multi-outcome markets - shows "Select Candidate" tooltip
 - Forces users to select a specific candidate before trading (prevents accidental wrong bets)
