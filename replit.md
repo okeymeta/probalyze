@@ -8,6 +8,16 @@ The application features real-time market charts, portfolio tracking, leaderboar
 
 ## Recent Updates (November 28, 2025)
 
+**Robust Market Loading System - Fixed Intermittent Loading Failures:**
+- Added retry logic with exponential backoff (3 retries, 100ms+ delays) to S3 operations
+- Implemented localStorage fallback cache for when S3 is unavailable or timeouts occur
+- When S3 download succeeds, data is automatically cached to localStorage as backup
+- If S3 fails, system automatically falls back to cached data in localStorage
+- Applied to both download and upload operations
+- Applied to list files operation
+- Markets now load reliably even with temporary network issues
+- Clear logging shows fallback mechanism at work
+
 **Gemini API Configuration Fixed:**
 - Removed hardcoded invalid API key from Dashboard.tsx (was causing 400 errors)
 - Updated geminiManager.ts and Dashboard.tsx to properly use environment variables
@@ -15,6 +25,10 @@ The application features real-time market charts, portfolio tracking, leaderboar
 - Fixed LSP errors by adding missing constants (ESTIMATED_APY, REWARD_PER_TASK)
 - Verified: "🔍 Gemini API Key Status: ✅ Loaded" in browser logs
 - Market description generation now works correctly with Gemini 2.5 Flash model
+
+**TypeScript & Build Fixes:**
+- Fixed MarketDetailView.tsx type errors using proper type assertion pattern
+- Updated vite.config.ts to properly expose GEMINI_API_KEY to browser via define configuration
 
 **Multi-Outcome Market UI Improvements:**
 - "Trade Now" button now disabled on multi-outcome markets - shows "Select Candidate" tooltip
