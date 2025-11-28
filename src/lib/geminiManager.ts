@@ -1,33 +1,19 @@
-import { GoogleGenAI } from "@google/genai";
-
 // Get API key from environment - Try both Vite and direct env vars
-const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
-               (import.meta.env.VITE_GOOGLE_API_KEY as string) || 
-               (typeof window !== 'undefined' && (window as any).__GEMINI_API_KEY) || 
-               '';
+const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) ||
+  (import.meta.env.VITE_GOOGLE_API_KEY as string) ||
+  (typeof window !== 'undefined' && (window as any).__GEMINI_API_KEY) ||
+  '';
 
 // Log for debugging
 if (typeof window !== 'undefined') {
   console.log('🔍 Gemini API Key Status:', apiKey ? '✅ Loaded' : '❌ Not found');
 }
 
-// Lazy initialization to avoid errors when key is missing
-let aiClient: GoogleGenAI | null = null;
-
-const getAiClient = () => {
-  if (!aiClient && apiKey) {
-    aiClient = new GoogleGenAI({ apiKey });
-  }
-  return aiClient;
-};
-
 export async function generateMarketDescription(
   marketTitle: string,
   category: string
 ): Promise<string> {
-  const client = getAiClient();
-  
-  if (!client) {
+  if (!apiKey) {
     throw new Error("Gemini API key not configured");
   }
 
@@ -48,17 +34,36 @@ Requirements:
 Generate only the description text:`;
 
   try {
-    const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }]
-        }
-      ]
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ]
+        })
+      }
+    );
 
-    return response.text || "Unable to generate description. Please try again.";
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Gemini API Error Details:', errorData);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      return data.candidates[0].content.parts[0].text;
+    }
+
+    return "Unable to generate description. Please try again.";
   } catch (error) {
     console.error('Gemini API Error:', error);
     throw new Error(`Failed to generate description: ${error instanceof Error ? error.message : "Unknown error"}`);

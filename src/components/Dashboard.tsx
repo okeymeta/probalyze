@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
 import { ESTIMATED_APY, REWARD_PER_TASK } from '../constants.ts';
 import { Task } from '../types.ts';
 import CheckIcon from './icons/CheckIcon.tsx';
@@ -38,42 +37,64 @@ export const Dashboard: React.FC<DashboardProps> = ({ publicKey, stakedAmount, t
         setTaskError(null);
         try {
             // Get API key from environment variables (must be exposed as VITE_ prefix for browser)
-            const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
-                                   (import.meta.env.VITE_GOOGLE_API_KEY as string) || '';
-            
+            const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string) ||
+                (import.meta.env.VITE_GOOGLE_API_KEY as string) || '';
+
             if (!GEMINI_API_KEY) {
                 throw new Error("Gemini API key not configured. Please add VITE_GEMINI_API_KEY or VITE_GOOGLE_API_KEY environment variable.");
             }
-            
-            const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-            const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: `Generate 3 new, simple, and distinct tasks a user can perform related to the Solana ecosystem. The current time is ${new Date().toISOString()} to ensure fresh results. Examples: 'Follow a Solana influencer on X', 'Join a Solana community on Discord'. Provide a unique ID for each task.`,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: Type.OBJECT,
-                        properties: {
-                            tasks: {
-                                type: Type.ARRAY,
-                                description: "A list of tasks for the user to complete.",
-                                items: {
-                                    type: Type.OBJECT,
-                                    properties: {
-                                        id: { type: Type.INTEGER, description: 'A unique identifier for the task.' },
-                                        title: { type: Type.STRING, description: 'A short, catchy title for the task.' },
-                                        description: { type: Type.STRING, description: 'A one-sentence description of what the user needs to do.' },
-                                    },
-                                    required: ['id', 'title', 'description'],
-                                },
-                            }
-                        },
-                    },
-                },
-            });
 
-            const jsonResponse = JSON.parse(response.text);
-            setTasks(jsonResponse.tasks || []);
+            const prompt = `Generate 3 new, simple, and distinct tasks a user can perform related to the Solana ecosystem. The current time is ${new Date().toISOString()} to ensure fresh results. Examples: 'Follow a Solana influencer on X', 'Join a Solana community on Discord'. Provide a unique ID for each task.`;
+
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    tasks: {
+                                        type: "ARRAY",
+                                        description: "A list of tasks for the user to complete.",
+                                        items: {
+                                            type: "OBJECT",
+                                            properties: {
+                                                id: { type: "INTEGER", description: 'A unique identifier for the task.' },
+                                                title: { type: "STRING", description: 'A short, catchy title for the task.' },
+                                                description: { type: "STRING", description: 'A one-sentence description of what the user needs to do.' },
+                                            },
+                                            required: ['id', 'title', 'description'],
+                                        },
+                                    }
+                                },
+                            },
+                        }
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Gemini API Error Details:', errorData);
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                const jsonText = data.candidates[0].content.parts[0].text;
+                const jsonResponse = JSON.parse(jsonText);
+                setTasks(jsonResponse.tasks || []);
+            } else {
+                throw new Error("Invalid response format from Gemini");
+            }
         } catch (error) {
             console.error("Failed to fetch tasks:", error);
             setTaskError("Could not load tasks. Please try again.");
@@ -97,19 +118,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ publicKey, stakedAmount, t
         <div className="w-full max-w-4xl mx-auto p-8 bg-gray-800/50 rounded-2xl shadow-2xl border border-gray-700 backdrop-blur-lg animate-fade-in">
             <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center bg-green-500/20 text-green-300 px-4 py-2 rounded-full mb-4">
-                    <CheckIcon className="w-5 h-5 mr-2"/>
+                    <CheckIcon className="w-5 h-5 mr-2" />
                     Stake Successful! Your Rewards Are Now Accruing.
                 </div>
                 <h2 className="text-3xl font-bold text-white">Your Earning Dashboard</h2>
                 <p className="text-gray-400 mt-2">Wallet: <span className="font-mono text-purple-400">{formattedPublicKey}</span></p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
                 <div className="bg-gray-900/70 p-6 rounded-xl border border-gray-600">
                     <h3 className="text-sm font-medium text-gray-400 uppercase">Total Staked</h3>
                     <p className="text-4xl font-bold text-white mt-2">{stakedAmount.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 8 })} SOL</p>
                 </div>
-                 <div className="bg-purple-900/20 p-6 rounded-xl border border-purple-700">
+                <div className="bg-purple-900/20 p-6 rounded-xl border border-purple-700">
                     <h3 className="text-sm font-medium text-purple-300 uppercase">Live Staking Rewards</h3>
                     <p className="text-3xl font-bold text-white mt-2 tabular-nums">{accruedRewards.toLocaleString(undefined, { minimumFractionDigits: 8, maximumFractionDigits: 8 })} SOL</p>
                     <span className="text-xs font-bold text-purple-400/80">{ESTIMATED_APY}% Est. APY</span>
