@@ -1,6 +1,7 @@
 import { Market, MarketData, Bet, PredictionOption, MarketStatus, ChartDataPoint, UserBalance, PlatformStats, MarketCategory, UserAgreement, CopyTradeAction, MarketType, TimingType, MarketOutcome, MarketNews, MarketComment, MarketRule } from '../types'
 import { uploadJSONFile, downloadJSONFile } from './s3Storage'
 import { ADMIN_WALLET_ADDRESS, PLATFORM_FEE_PERCENTAGE, SETTLEMENT_FEE_PERCENTAGE } from '../constants'
+import { cacheManager } from './cacheManager'
 
 const MARKETS_FILE = 'markets.json'
 const BALANCES_FILE = 'balances.json'
@@ -75,9 +76,16 @@ export const initializeStorageFiles = async (): Promise<void> => {
   }
 }
 
-// Load all markets from storage
+// Load all markets from storage with intelligent caching
 export const loadMarkets = async (): Promise<Market[]> => {
   try {
+    // Check cache first - huge performance boost for repeated loads
+    const cachedMarkets = cacheManager.getMarketsCache('all_markets')
+    if (cachedMarkets) {
+      console.log('📦 Using cached markets:', cachedMarkets.length)
+      return cachedMarkets
+    }
+
     // Ensure files are initialized
     if (!filesInitialized) {
       await initializeStorageFiles()
@@ -91,6 +99,10 @@ export const loadMarkets = async (): Promise<Market[]> => {
     if (!result.data || !result.data.markets) {
       return []
     }
+
+    // Cache the loaded markets
+    cacheManager.setMarketsCache('all_markets', result.data.markets)
+    console.log(`✅ Loaded and cached ${result.data.markets.length} markets`)
     return result.data.markets
   } catch (err) {
     console.error('Error loading markets:', err)
@@ -98,7 +110,55 @@ export const loadMarkets = async (): Promise<Market[]> => {
   }
 }
 
-// Save markets to storage
+/**
+ * Load paginated markets for efficient UI rendering
+ * Fetches all markets once and caches them, then returns only requested page
+ */
+export const loadPaginatedMarkets = async (
+  page: number = 1,
+  pageSize: number = 20
+): Promise<{ markets: Market[]; total: number; pages: number; currentPage: number }> => {
+  try {
+    const allMarkets = await loadMarkets()
+    const result = cacheManager.getPaginatedMarkets(allMarkets, page, pageSize)
+    
+    console.log(`📄 Page ${page}/${result.pages}: showing ${result.markets.length} of ${result.total} markets`)
+    
+    return {
+      ...result,
+      currentPage: page
+    }
+  } catch (err) {
+    console.error('Error loading paginated markets:', err)
+    throw err
+  }
+}
+
+/**
+ * Load filtered and paginated markets
+ */
+export const loadFilteredPaginatedMarkets = async (
+  filterFn: (market: Market) => boolean,
+  page: number = 1,
+  pageSize: number = 20
+): Promise<{ markets: Market[]; total: number; pages: number; currentPage: number }> => {
+  try {
+    const allMarkets = await loadMarkets()
+    const result = cacheManager.getFilteredPaginatedMarkets(allMarkets, filterFn, page, pageSize)
+    
+    console.log(`🔍 Filtered page ${page}/${result.pages}: showing ${result.markets.length} of ${result.total} markets`)
+    
+    return {
+      ...result,
+      currentPage: page
+    }
+  } catch (err) {
+    console.error('Error loading filtered markets:', err)
+    throw err
+  }
+}
+
+// Save markets to storage and invalidate cache
 export const saveMarkets = async (markets: Market[]): Promise<boolean> => {
   try {
     const marketData: MarketData = {
@@ -106,6 +166,13 @@ export const saveMarkets = async (markets: Market[]): Promise<boolean> => {
       lastUpdated: Date.now()
     }
     const result = await uploadJSONFile(MARKETS_FILE, marketData)
+    
+    // Invalidate cache when markets are updated
+    if (result.error === null) {
+      cacheManager.clearMarkets('all_markets')
+      console.log('🔄 Markets cache invalidated')
+    }
+    
     return result.error === null
   } catch (err) {
     console.error('Error saving markets:', err)
@@ -113,9 +180,16 @@ export const saveMarkets = async (markets: Market[]): Promise<boolean> => {
   }
 }
 
-// Load user balances
+// Load user balances with caching
 export const loadBalances = async (): Promise<Record<string, UserBalance>> => {
   try {
+    // Check cache first
+    const cachedBalances = cacheManager.getBalancesCache('all_balances')
+    if (cachedBalances) {
+      console.log('💰 Using cached balances')
+      return cachedBalances
+    }
+
     // Ensure files are initialized
     if (!filesInitialized) {
       await initializeStorageFiles()
@@ -125,17 +199,30 @@ export const loadBalances = async (): Promise<Record<string, UserBalance>> => {
     if (result.error && !result.usedFallback) {
       console.error('Error loading balances:', result.error)
     }
-    return result.data || {}
+
+    const balances = result.data || {}
+    // Cache the balances
+    cacheManager.setBalancesCache('all_balances', balances)
+    console.log(`✅ Loaded and cached balances for ${Object.keys(balances).length} users`)
+    
+    return balances
   } catch (err) {
     console.error('Error loading balances:', err)
     return {}
   }
 }
 
-// Save user balances
+// Save user balances and invalidate cache
 export const saveBalances = async (balances: Record<string, UserBalance>): Promise<boolean> => {
   try {
     const result = await uploadJSONFile(BALANCES_FILE, balances)
+    
+    // Invalidate cache when balances are updated
+    if (result.error === null) {
+      cacheManager.clearBalances('all_balances')
+      console.log('🔄 Balances cache invalidated')
+    }
+    
     return result.error === null
   } catch (err) {
     console.error('Error saving balances:', err)
