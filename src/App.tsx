@@ -18,6 +18,7 @@ import { UserBalanceWidget } from './components/UserBalanceWidget';
 import { PortfolioPage } from './components/PortfolioPage';
 import { LeaderboardPage } from './components/LeaderboardPage';
 import { loadMarkets, checkAndRefundSingleBettorMarkets, initializeStorageFiles } from './lib/marketManager';
+import { loadNetworkPreferenceFromS3 } from './lib/networkManager';
 
 type ModalContent = { message: string; type: 'success' | 'error' | 'info'; } | null;
 type Page = 'markets' | 'portfolio' | 'leaderboard';
@@ -55,6 +56,11 @@ export const App: React.FC = () => {
         // Initialize storage files on app load
         initializeStorageFiles().then(() => {
             console.log('Storage files ready');
+        });
+
+        // Load network preference from S3 on app startup
+        loadNetworkPreferenceFromS3().catch(err => {
+            console.log('Could not load network preference from S3:', err);
         });
 
         // Check if user has previously accepted terms
