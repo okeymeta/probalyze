@@ -3,6 +3,7 @@ import { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } f
 import { Market, PredictionOption, SolanaProvider } from '../types';
 import { placeBet, calculatePotentialPayout, getWalletBetsInMarket, copyTrade } from '../lib/marketManager';
 import { PLATFORM_WALLET_ADDRESS, MINIMUM_BET_AMOUNT, TRANSACTION_FEE_LAMPORTS, PLATFORM_FEE_PERCENTAGE, SETTLEMENT_FEE_PERCENTAGE } from '../constants';
+import { getRpcEndpoint } from '../lib/networkManager';
 import SpinnerIcon from './icons/SpinnerIcon';
 import { Copy, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 
@@ -44,7 +45,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
     setError(null);
 
     try {
-      const connection = new Connection('https://solana-rpc.publicnode.com', 'confirmed');
+      const connection = new Connection(getRpcEndpoint(), 'confirmed');
       const userPublicKey = new PublicKey(userWallet);
       
       // Check balance
@@ -149,7 +150,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
     setError(null);
 
     try {
-      const connection = new Connection('https://solana-rpc.publicnode.com', 'confirmed');
+      const connection = new Connection(getRpcEndpoint(), 'confirmed');
       const userPublicKey = new PublicKey(userWallet);
       
       // Check balance

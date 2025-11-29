@@ -4,6 +4,7 @@ import { UserBalance, SolanaProvider } from '../types';
 import { Wallet, TrendingUp, TrendingDown, Award, Plus, Info, Zap, ArrowDownToLine, X, Loader2, AlertCircle, Check } from 'lucide-react';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { PLATFORM_WALLET_ADDRESS, PLATFORM_FEE_PERCENTAGE, SETTLEMENT_FEE_PERCENTAGE } from '../constants';
+import { getRpcEndpoint } from '../lib/networkManager';
 
 interface UserBalanceWidgetProps {
   walletAddress: string;
@@ -15,27 +16,9 @@ const ESTIMATED_GAS_FEE_SOL = 0.000005;
 // Platform deposit fee percentage
 const DEPOSIT_FEE_PERCENTAGE = 0;
 
-// Use multiple RPC endpoints with fallback
-const RPC_ENDPOINTS = [
-  'https://solana-rpc.publicnode.com',
-  'https://solana-mainnet.g.alchemy.com/v2/demo',
-  'https://rpc.ankr.com/solana',
-  'https://api.mainnet-beta.solana.com',
-];
-
+// Get connection to current network
 const getConnection = async (): Promise<Connection> => {
-  for (const endpoint of RPC_ENDPOINTS) {
-    try {
-      const connection = new Connection(endpoint, 'confirmed');
-      // Test if the endpoint works
-      await connection.getLatestBlockhash();
-      return connection;
-    } catch (err) {
-      console.warn(`RPC endpoint ${endpoint} failed, trying next...`);
-    }
-  }
-  // Fallback to publicnode
-  return new Connection('https://solana-rpc.publicnode.com', 'confirmed');
+  return new Connection(getRpcEndpoint(), 'confirmed');
 };
 
 export const UserBalanceWidget: React.FC<UserBalanceWidgetProps> = ({ walletAddress, provider }) => {

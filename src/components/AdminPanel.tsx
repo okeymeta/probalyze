@@ -3,8 +3,9 @@ import { createMarket } from '../lib/marketManager';
 import { uploadImage } from '../lib/storageManager';
 import { generateMarketDescription } from '../lib/geminiManager';
 import { MarketCategory, MarketType, TimingType } from '../types';
+import { getCurrentNetwork, switchNetwork, getAvailableNetworks } from '../lib/networkManager';
 import SpinnerIcon from './icons/SpinnerIcon';
-import { Plus, Trash2, X, Wand2, Calendar } from 'lucide-react';
+import { Plus, Trash2, X, Wand2, Calendar, Wifi } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
@@ -280,9 +281,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ adminWallet, onMarketCre
     }
   };
 
+  const currentNetwork = getCurrentNetwork();
+  const networks = getAvailableNetworks();
+
   return (
     <div className="bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-      <h2 className="text-2xl sm:text-3xl font-bold text-purple-400 mb-6">🔐 Admin Panel - Create Market</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-purple-400">🔐 Admin Panel - Create Market</h2>
+        <div className="flex items-center gap-2 bg-gray-900 rounded-lg p-2">
+          <Wifi className="w-4 h-4 text-purple-400" />
+          <select
+            value={currentNetwork}
+            onChange={(e) => switchNetwork(e.target.value as 'mainnet' | 'testnet')}
+            className="bg-gray-900 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            {networks.map(net => (
+              <option key={net.name} value={net.name}>{net.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-3 mb-4">
